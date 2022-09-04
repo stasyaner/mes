@@ -53,3 +53,24 @@ export function isOpeningAngleBracket(c) {
 export function isClosingAngleBracket(c) {
     return c === '>';
 }
+
+export function isSlash(c) {
+    return c === '/';
+}
+
+export function isOpeningCurlyBrace(c) {
+    return c === '{';
+}
+
+export function isClosingCurlyBrace(c) {
+    return c === '}';
+}
+
+export function isNotControlCharacter(c) {
+    return c >= '!' && c <= '~';
+}
+
+export function isJsxText(c) {
+    return isNotControlCharacter(c) && !isOpeningCurlyBrace(c) &&
+           !isClosingCurlyBrace(c);
+}

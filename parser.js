@@ -40,7 +40,7 @@ function statement(lookahead, input) {
 }
 
 function expressionStatement(lookahead, input) {
-    const value = expression(lookahead);
+    const value = expression(lookahead, input);
 
     const nextLookahead = getNextToken(input);
     console.log('lookahead', lookahead, 'nextLookahead', nextLookahead);
@@ -53,8 +53,51 @@ function expressionStatement(lookahead, input) {
     };
 }
 
-function expression(lookahead) {
-    return literal(lookahead);
+function expression(lookahead, input) {
+    switch(lookahead.type) {
+        case 'Number':
+        case 'String':
+            return literal(lookahead);
+        case 'JSXOpening':
+            return jsxExpression(lookahead, input);
+    }
+}
+
+function jsxExpression(lookahead, input) {
+    const openingLookahed = lookahead;
+    const contentLookahead = getNextToken(input);
+    const closingLookahead = getNextToken(input);
+
+    return {
+        type: 'JSXExpression',
+        openingElement: jsxOpeningElement(openingLookahed),
+        closingElement: jsxClosingElement(closingLookahead),
+        value: jsxContent(contentLookahead),
+    };
+}
+
+function jsxOpeningElement(lookahead) {
+    const token = readToken(lookahead, 'JSXOpening');
+    return {
+        type: 'JSXOpeningElement',
+        value: token,
+    };
+}
+
+function jsxContent(lookahead) {
+    const token = readToken(lookahead, 'JSXText');
+    return {
+        type: 'JSXText',
+        value: token,
+    };
+}
+
+function jsxClosingElement(lookahead) {
+    const token = readToken(lookahead, 'JSXClosing');
+    return {
+        type: 'JSXClosingElement',
+        value: token,
+    }
 }
 
 function numericLiteral(lookahead) {

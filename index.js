@@ -4,7 +4,7 @@ function main() {
     const input = `
         124;
         "hello";
-        <div></div>;
+        <div>asd</div>;
     `;
     console.log('input', input, '\n');
     const ast = parse(input);
