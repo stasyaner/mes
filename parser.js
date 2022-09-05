@@ -1,32 +1,32 @@
 import { getNextToken, readToken } from "./tokenizer.js";
 
-export function parse(input) {
+export function parse() {
     // const lookahead = getNextToken(input);
     // return program(lookahead);
-    return program(input);
+    return program();
 }
 
 // export function program(token) {
-export function program(input) {
+export function program() {
     return {
         type: 'File',
-        content: statementList(input),
+        content: statementList(),
     };
 }
 
 // function statementList(lookahead) {
-function statementList(input) {
-    let lookahead = getNextToken(input);
-    const list = [statement(lookahead, input)];
+function statementList() {
+    let lookahead = getNextToken();
+    const list = [statement(lookahead)];
 
-    while(lookahead = getNextToken(input)) {
+    while(lookahead = getNextToken()) {
         // if(readToken(lookahead, 'EOF')) break;
         try {
             readToken(lookahead, 'EOF');
             break;
         } catch(e) {}
 
-        list.push(statement(lookahead, input));
+        list.push(statement(lookahead));
     }
 
     return {
@@ -35,14 +35,14 @@ function statementList(input) {
     };
 }
 
-function statement(lookahead, input) {
-    return expressionStatement(lookahead, input);
+function statement(lookahead) {
+    return expressionStatement(lookahead);
 }
 
-function expressionStatement(lookahead, input) {
-    const value = expression(lookahead, input);
+function expressionStatement(lookahead) {
+    const value = expression(lookahead);
 
-    const nextLookahead = getNextToken(input);
+    const nextLookahead = getNextToken();
     console.log('lookahead', lookahead, 'nextLookahead', nextLookahead);
     // readToken(nextLookahead, ';', 'Linebreak', 'EOF');
     readToken(nextLookahead, ';', 'EOF');
@@ -53,20 +53,20 @@ function expressionStatement(lookahead, input) {
     };
 }
 
-function expression(lookahead, input) {
+function expression(lookahead) {
     switch(lookahead.type) {
         case 'Number':
         case 'String':
             return literal(lookahead);
         case 'JSXOpening':
-            return jsxExpression(lookahead, input);
+            return jsxExpression(lookahead);
     }
 }
 
-function jsxExpression(lookahead, input) {
+function jsxExpression(lookahead) {
     const openingLookahed = lookahead;
-    const contentLookahead = getNextToken(input);
-    const closingLookahead = getNextToken(input);
+    const contentLookahead = getNextToken();
+    const closingLookahead = getNextToken();
 
     return {
         type: 'JSXExpression',

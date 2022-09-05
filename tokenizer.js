@@ -16,7 +16,7 @@ import {
 let isJSXOpened = false;
 let cachedCharacter = null;
 
-export function getNextToken(input) {
+export function getNextToken() {
     let token = {
         type: null,
         value: '',
@@ -27,7 +27,7 @@ export function getNextToken(input) {
         c = cachedCharacter;
         cachedCharacter = null;
     } else {
-        c = getchar(input);
+        c = getchar();
     }
     console.log('c', c);
 
@@ -37,7 +37,7 @@ export function getNextToken(input) {
             default:
                 token.type = 'JSXText';
                 token.value += c;
-                while(!isOpeningAngleBracket(c = getchar(input))) {
+                while(!isOpeningAngleBracket(c = getchar())) {
                     token.value += c;
                     if (isEOF(c)) {
                         throw new Error(
@@ -57,7 +57,7 @@ export function getNextToken(input) {
                 token.value += c;
                 // Note: maybe it's not right to getchat while number.
                 //       What if char in the sequence?
-                while(isNumber(c = getchar(input))) {
+                while(isNumber(c = getchar())) {
                     token.value += c;
                 }
                 // if (!isSemicolon(c)) {
@@ -67,7 +67,7 @@ export function getNextToken(input) {
             case isStringEnclosure(c):
                 console.log('isStringEnclosure');
                 token.type = 'String';
-                while(!isStringEnclosure(c = getchar(input))) {
+                while(!isStringEnclosure(c = getchar())) {
                     if (isEOF(c)) {
                         throw new Error(
                             'Unexpected end of input while reading string.'
@@ -79,13 +79,13 @@ export function getNextToken(input) {
             case isSpace(c):
                 console.log('isSpace');
                 // const slicedInput = sliceStream(input);
-                return getNextToken(input);
+                return getNextToken();
             case isSemicolon(c):
                 console.log('isSemicolon');
                 return { type: ';' };
             case isLinebreak(c):
                 console.log('isLinebreak');
-                return getNextToken(input);
+                return getNextToken();
                 // for the case of expression statement without semicolon
                 // return { type: 'Linebreak' };
             case isEOF(c):
@@ -94,7 +94,7 @@ export function getNextToken(input) {
             case isOpeningAngleBracket(c):
                 console.log('isOpeningAngleBracket');
 
-                const charAfterOpeningAngleBracket = getchar(input);
+                const charAfterOpeningAngleBracket = getchar();
                 if (isSlash(charAfterOpeningAngleBracket)) {
                     token.type = 'JSXClosing';
                 } else {
@@ -103,12 +103,12 @@ export function getNextToken(input) {
                     isJSXOpened = true;
                 }
 
-                while(!isClosingAngleBracket(c = getchar(input))) {
+                while(!isClosingAngleBracket(c = getchar())) {
                     token.value += c;
                 }
                 break;
             default:
-                return getNextToken(input);
+                return getNextToken();
                 // throw new Error(`Unexpected token: ${c}`);
                 // throw new Error('Unexpected continuation of input.');
                 // return null;

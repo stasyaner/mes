@@ -1,7 +1,12 @@
 export const EOF = -1;
 let cursor = 0;
+let stream = '';
 
-export function getchar(stream) {
+export function inputStream(input) {
+    stream = input;
+}
+
+export function getchar() {
     // console.log('cursor', cursor);
     if (cursor >= stream.length) {
         // return null;

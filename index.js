@@ -1,4 +1,5 @@
 import { parse } from './parser.js';
+import { inputStream } from './utils.js';
 
 function main() {
     const input = `
@@ -6,8 +7,9 @@ function main() {
         "hello";
         <div>asd</div>;
     `;
+    inputStream(input);
     console.log('input', input, '\n');
-    const ast = parse(input);
+    const ast = parse();
     console.log('\nResult:');
     console.log(JSON.stringify(ast, null, 2));
 }
