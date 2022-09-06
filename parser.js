@@ -64,13 +64,13 @@ function expression(lookahead) {
 }
 
 function jsxExpression(lookahead) {
-    const openingLookahed = lookahead;
+    const openingLookahead = lookahead;
     const contentLookahead = getNextToken();
     const closingLookahead = getNextToken();
 
     return {
         type: 'JSXExpression',
-        openingElement: jsxOpeningElement(openingLookahed),
+        openingElement: jsxOpeningElement(openingLookahead),
         closingElement: jsxClosingElement(closingLookahead),
         value: jsxContent(contentLookahead),
     };
