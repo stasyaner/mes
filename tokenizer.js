@@ -65,6 +65,8 @@ export function getNextToken() {
             case isStringEnclosure(c):
                 console.log('isStringEnclosure');
                 token.type = 'String';
+                // TODO: restrict closing string enclosure to the same type as
+                //       the opening one
                 while(!isStringEnclosure(c = getchar())) {
                     if (isEOF(c)) {
                         throw new Error(
