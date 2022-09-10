@@ -15,15 +15,11 @@ export function getchar() {
 
     const c = stream[cursor];
     cursor++;
-    console.log('getchar', c);
+    if (c !== ' ' && c !== '\n') console.log('getchar', c);
 
     return c;
 };
 
-// export function sliceStream(stream) {
-//     // cursor = startIndex;
-//     return stream.slice(cursor ? cursor - 1 : cursor);
-// }
 
 export function isNumber(c) {
     // const charCode = c.charCodeAt(0);

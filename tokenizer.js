@@ -29,7 +29,7 @@ export function getNextToken() {
     } else {
         c = getchar();
     }
-    console.log('c', c);
+    // console.log('c', c);
 
     if(isJSXOpened) {
         switch(true) {
@@ -55,8 +55,6 @@ export function getNextToken() {
                 console.log('isNumber');
                 token.type = 'Number';
                 token.value += c;
-                // Note: maybe it's not right to getchat while number.
-                //       What if char in the sequence?
                 while(isNumber(c = getchar())) {
                     token.value += c;
                 }
@@ -77,14 +75,14 @@ export function getNextToken() {
                 }
                 break;
             case isSpace(c):
-                console.log('isSpace');
+                // console.log('isSpace');
                 // const slicedInput = sliceStream(input);
                 return getNextToken();
             case isSemicolon(c):
                 console.log('isSemicolon');
                 return { type: ';' };
             case isLinebreak(c):
-                console.log('isLinebreak');
+                // console.log('isLinebreak');
                 return getNextToken();
                 // for the case of expression statement without semicolon
                 // return { type: 'Linebreak' };
@@ -95,15 +93,32 @@ export function getNextToken() {
                 console.log('isOpeningAngleBracket');
 
                 const charAfterOpeningAngleBracket = getchar();
-                if (isSlash(charAfterOpeningAngleBracket)) {
-                    token.type = 'JSXClosing';
-                } else {
-                    token.type = 'JSXOpening';
-                    token.value += charAfterOpeningAngleBracket;
-                    isJSXOpened = true;
+                switch(true) {
+                    case isSlash(charAfterOpeningAngleBracket):
+                        token.type = 'JSXClosing';
+                        break;
+                    case isSpace(charAfterOpeningAngleBracket):
+                        throw new Error(
+                            'Unexpected space while reading opening JSX token'
+                        )
+                    default:
+                        token.type = 'JSXOpening';
+                        token.value += charAfterOpeningAngleBracket;
+                        isJSXOpened = true;
                 }
 
                 while(!isClosingAngleBracket(c = getchar())) {
+                    if (isSlash(c)) {
+                        if (token.type === 'JSXClosing') {
+                            throw new Error(
+                                'Unexpected "/" while reading closing JSX token'
+                            );
+                        }
+                        getchar();
+                        token.type = 'JSXSelfClosing';
+                        isJSXOpened = false;
+                        break;
+                    }
                     token.value += c;
                 }
                 break;

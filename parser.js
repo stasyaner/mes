@@ -59,28 +59,36 @@ function expression(lookahead) {
         case 'String':
             return literal(lookahead);
         case 'JSXOpening':
+        case 'JSXSelfClosing':
             return jsxExpression(lookahead);
     }
 }
 
 function jsxExpression(lookahead) {
     const openingLookahead = lookahead;
-    const contentLookahead = getNextToken();
-    const closingLookahead = getNextToken();
+    const openingElement = jsxOpeningElement(openingLookahead);
+    let content = null;
+    let closingElement = null;
+    if (!openingElement.selfClosing) {
+        content = jsxContent(getNextToken());
+        closingElement = jsxClosingElement(getNextToken());
+    }
+    console.log('openingElement', openingElement);
 
     return {
         type: 'JSXExpression',
-        openingElement: jsxOpeningElement(openingLookahead),
-        closingElement: jsxClosingElement(closingLookahead),
-        value: jsxContent(contentLookahead),
+        openingElement,
+        closingElement,
+        value: content,
     };
 }
 
 function jsxOpeningElement(lookahead) {
-    const token = readToken(lookahead, 'JSXOpening');
+    const token = readToken(lookahead, 'JSXOpening', 'JSXSelfClosing');
     return {
         type: 'JSXOpeningElement',
         value: token,
+        selfClosing: lookahead.type === 'JSXSelfClosing',
     };
 }
 

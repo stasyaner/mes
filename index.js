@@ -6,6 +6,8 @@ function main() {
         124;
         "hello";
         <div>asd</div>;
+        <img />;
+        123;
     `;
     inputStream(input);
     console.log('input', input, '\n');
