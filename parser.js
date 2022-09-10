@@ -55,13 +55,49 @@ function expressionStatement(lookahead) {
 
 function expression(lookahead) {
     switch(lookahead.type) {
-        case 'Number':
-        case 'String':
-            return literal(lookahead);
         case 'JSXOpening':
         case 'JSXSelfClosing':
             return jsxExpression(lookahead);
+        default:
+            return relationalExpression(lookahead);
     }
+}
+
+function relationalExpression(lookahead) {
+    const leftExpression = () => literal(lookahead);
+    return binaryExpressionWrapper(leftExpression, 'Relational');
+}
+
+function binaryExpressionWrapper(leftExpression, operatorToken) {
+    let left = leftExpression();
+    let right = null;
+    console.log('leftExpression', left);
+
+    let lookahead;
+    while(lookahead = getNextToken()) {
+        console.log('while', lookahead);
+        let operator = null;
+        try {
+            operator = assertTokenAndReadValue(lookahead, operatorToken);
+        } catch(e) {
+            break;
+        }
+        console.log('operator', lookahead);
+
+        const nextLookahead = getNextToken();
+        console.log('nextLookahead', nextLookahead);
+        right = literal(nextLookahead);
+        left = {
+            type: 'BinaryExpression',
+            left,
+            right,
+            operator,
+        };
+    }
+
+    console.log('left', left);
+
+    return left;
 }
 
 function jsxExpression(lookahead) {

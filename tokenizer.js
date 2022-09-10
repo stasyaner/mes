@@ -100,29 +100,34 @@ export function getNextToken() {
                         token.type = 'JSXClosing';
                         break;
                     case isSpace(charAfterOpeningAngleBracket):
-                        throw new Error(
-                            'Unexpected space while reading opening JSX token'
-                        )
+                        token.type = 'Relational';
+                        token.value = c;
                     default:
                         token.type = 'JSXOpening';
                         token.value += charAfterOpeningAngleBracket;
                         isJSXOpened = true;
                 }
 
-                while(!isClosingAngleBracket(c = getchar())) {
-                    if (isSlash(c)) {
-                        if (token.type === 'JSXClosing') {
-                            throw new Error(
-                                'Unexpected "/" while reading closing JSX token'
-                            );
+                if (token.type !== 'Relational') {
+                    while(!isClosingAngleBracket(c = getchar())) {
+                        if (isSlash(c)) {
+                            if (token.type === 'JSXClosing') {
+                                let message = 'Unexpected "/" while reading';
+                                message += ' closing JSX token';
+                                throw new Error(message);
+                            }
+                            getchar();
+                            token.type = 'JSXSelfClosing';
+                            isJSXOpened = false;
+                            break;
                         }
-                        getchar();
-                        token.type = 'JSXSelfClosing';
-                        isJSXOpened = false;
-                        break;
+                        token.value += c;
                     }
-                    token.value += c;
                 }
+                break;
+            case isClosingAngleBracket(c):
+                token.type = 'Relational';
+                token.value = c;
                 break;
             default:
                 return getNextToken();
