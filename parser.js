@@ -1,4 +1,4 @@
-import { getNextToken, readToken } from "./tokenizer.js";
+import { getNextToken, assertTokenAndReadValue } from "./tokenizer.js";
 
 export function parse() {
     // const lookahead = getNextToken(input);
@@ -20,9 +20,9 @@ function statementList() {
     const list = [statement(lookahead)];
 
     while(lookahead = getNextToken()) {
-        // if(readToken(lookahead, 'EOF')) break;
+        // if(assertTokenAndReadValue(lookahead, 'EOF')) break;
         try {
-            readToken(lookahead, 'EOF');
+            assertTokenAndReadValue(lookahead, 'EOF');
             break;
         } catch(e) {}
 
@@ -44,8 +44,8 @@ function expressionStatement(lookahead) {
 
     const nextLookahead = getNextToken();
     console.log('lookahead', lookahead, 'nextLookahead', nextLookahead);
-    // readToken(nextLookahead, ';', 'Linebreak', 'EOF');
-    readToken(nextLookahead, ';', 'EOF');
+    // assertTokenAndReadValue(nextLookahead, ';', 'Linebreak', 'EOF');
+    assertTokenAndReadValue(nextLookahead, ';', 'EOF');
 
     return {
         type: 'ExpressionStatement',
@@ -84,7 +84,7 @@ function jsxExpression(lookahead) {
 }
 
 function jsxOpeningElement(lookahead) {
-    const token = readToken(lookahead, 'JSXOpening', 'JSXSelfClosing');
+    const token = assertTokenAndReadValue(lookahead, 'JSXOpening', 'JSXSelfClosing');
     return {
         type: 'JSXOpeningElement',
         value: token,
@@ -93,7 +93,7 @@ function jsxOpeningElement(lookahead) {
 }
 
 function jsxContent(lookahead) {
-    const token = readToken(lookahead, 'JSXText');
+    const token = assertTokenAndReadValue(lookahead, 'JSXText');
     return {
         type: 'JSXText',
         value: token,
@@ -101,7 +101,7 @@ function jsxContent(lookahead) {
 }
 
 function jsxClosingElement(lookahead) {
-    const token = readToken(lookahead, 'JSXClosing');
+    const token = assertTokenAndReadValue(lookahead, 'JSXClosing');
     return {
         type: 'JSXClosingElement',
         value: token,
@@ -109,7 +109,7 @@ function jsxClosingElement(lookahead) {
 }
 
 function numericLiteral(lookahead) {
-    const token = readToken(lookahead, 'Number');
+    const token = assertTokenAndReadValue(lookahead, 'Number');
     return {
         type: 'NumericLiteral',
         value: Number(token),
@@ -117,7 +117,7 @@ function numericLiteral(lookahead) {
 }
 
 function stringLiteral(lookahead) {
-    const token = readToken(lookahead, 'String');
+    const token = assertTokenAndReadValue(lookahead, 'String');
     return {
         type: 'StringLiteral',
         value: token,

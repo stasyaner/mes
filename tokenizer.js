@@ -135,7 +135,7 @@ export function getNextToken() {
     return token;
 }
 
-export function readToken(lookahead, ...tokenTypes) {
+export function assertTokenAndReadValue(lookahead, ...tokenTypes) {
     if (!lookahead) {
         throw new Error("Unexpected end of input.");
     }
