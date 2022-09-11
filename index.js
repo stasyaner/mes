@@ -8,6 +8,8 @@ function main() {
         <div>asd</div>;
         <img />;
         123;
+        1 > 3;
+        "ddd";
     `;
     inputStream(input);
     console.log('input', input, '\n');

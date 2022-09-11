@@ -1,12 +1,15 @@
-import { getNextToken, assertTokenAndReadValue } from "./tokenizer.js";
+import { getNextToken, assertTokenType } from "./tokenizer.js";
+
+let lookaheadToken = null;
+function lookahead() {
+    lookaheadToken = getNextToken();
+}
 
 export function parse() {
-    // const lookahead = getNextToken(input);
-    // return program(lookahead);
+    lookahead();
     return program();
 }
 
-// export function program(token) {
 export function program() {
     return {
         type: 'File',
@@ -14,19 +17,13 @@ export function program() {
     };
 }
 
-// function statementList(lookahead) {
 function statementList() {
-    let lookahead = getNextToken();
-    const list = [statement(lookahead)];
+    const list = [statement()];
 
-    while(lookahead = getNextToken()) {
-        // if(assertTokenAndReadValue(lookahead, 'EOF')) break;
-        try {
-            assertTokenAndReadValue(lookahead, 'EOF');
-            break;
-        } catch(e) {}
+    // readTokenAndLookahead('EOF');
 
-        list.push(statement(lookahead));
+    while(lookaheadToken.type !== 'EOF') {
+        list.push(statement());
     }
 
     return {
@@ -35,17 +32,15 @@ function statementList() {
     };
 }
 
-function statement(lookahead) {
-    return expressionStatement(lookahead);
+function statement() {
+    return expressionStatement();
 }
 
-function expressionStatement(lookahead) {
-    const value = expression(lookahead);
+function expressionStatement() {
+    const value = expression();
 
-    const nextLookahead = getNextToken();
-    console.log('lookahead', lookahead, 'nextLookahead', nextLookahead);
-    // assertTokenAndReadValue(nextLookahead, ';', 'Linebreak', 'EOF');
-    assertTokenAndReadValue(nextLookahead, ';', 'EOF');
+    // readTokenAndLookahead(';', 'Linebreak', 'EOF');
+    readTokenAndLookahead(';', 'EOF');
 
     return {
         type: 'ExpressionStatement',
@@ -53,40 +48,27 @@ function expressionStatement(lookahead) {
     };
 }
 
-function expression(lookahead) {
-    switch(lookahead.type) {
+function expression() {
+    switch(lookaheadToken.type) {
         case 'JSXOpening':
         case 'JSXSelfClosing':
-            return jsxExpression(lookahead);
+            return jsxExpression();
         default:
-            return relationalExpression(lookahead);
+            return relationalExpression();
     }
 }
 
-function relationalExpression(lookahead) {
-    const leftExpression = () => literal(lookahead);
-    return binaryExpressionWrapper(leftExpression, 'Relational');
+function relationalExpression() {
+    return binaryExpressionWrapper(literal, 'Relational');
 }
 
 function binaryExpressionWrapper(leftExpression, operatorToken) {
     let left = leftExpression();
-    let right = null;
-    console.log('leftExpression', left);
 
-    let lookahead;
-    while(lookahead = getNextToken()) {
-        console.log('while', lookahead);
-        let operator = null;
-        try {
-            operator = assertTokenAndReadValue(lookahead, operatorToken);
-        } catch(e) {
-            break;
-        }
-        console.log('operator', lookahead);
+    while(lookaheadToken.type === 'Relational') {
+        const { value: operator } = readTokenAndLookahead(operatorToken);
+        const right = literal();
 
-        const nextLookahead = getNextToken();
-        console.log('nextLookahead', nextLookahead);
-        right = literal(nextLookahead);
         left = {
             type: 'BinaryExpression',
             left,
@@ -95,19 +77,16 @@ function binaryExpressionWrapper(leftExpression, operatorToken) {
         };
     }
 
-    console.log('left', left);
-
     return left;
 }
 
-function jsxExpression(lookahead) {
-    const openingLookahead = lookahead;
-    const openingElement = jsxOpeningElement(openingLookahead);
+function jsxExpression() {
+    const openingElement = jsxOpeningElement();
     let content = null;
     let closingElement = null;
     if (!openingElement.selfClosing) {
-        content = jsxContent(getNextToken());
-        closingElement = jsxClosingElement(getNextToken());
+        content = jsxContent();
+        closingElement = jsxClosingElement();
     }
     console.log('openingElement', openingElement);
 
@@ -119,52 +98,62 @@ function jsxExpression(lookahead) {
     };
 }
 
-function jsxOpeningElement(lookahead) {
-    const token = assertTokenAndReadValue(lookahead, 'JSXOpening', 'JSXSelfClosing');
+function jsxOpeningElement() {
+    const token = readTokenAndLookahead('JSXOpening', 'JSXSelfClosing');
     return {
         type: 'JSXOpeningElement',
-        value: token,
-        selfClosing: lookahead.type === 'JSXSelfClosing',
+        value: token.value,
+        selfClosing: token.type === 'JSXSelfClosing',
     };
 }
 
-function jsxContent(lookahead) {
-    const token = assertTokenAndReadValue(lookahead, 'JSXText');
+function jsxContent() {
+    const token = readTokenAndLookahead('JSXText');
     return {
         type: 'JSXText',
         value: token,
     };
 }
 
-function jsxClosingElement(lookahead) {
-    const token = assertTokenAndReadValue(lookahead, 'JSXClosing');
+function jsxClosingElement() {
+    const token = readTokenAndLookahead('JSXClosing');
     return {
         type: 'JSXClosingElement',
         value: token,
     }
 }
 
-function numericLiteral(lookahead) {
-    const token = assertTokenAndReadValue(lookahead, 'Number');
+function numericLiteral() {
+    const token = readTokenAndLookahead('Number');
     return {
         type: 'NumericLiteral',
-        value: Number(token),
+        value: Number(token.value),
     };
 }
 
-function stringLiteral(lookahead) {
-    const token = assertTokenAndReadValue(lookahead, 'String');
+function stringLiteral() {
+    const token = readTokenAndLookahead('String');
     return {
         type: 'StringLiteral',
-        value: token,
+        value: token.value,
     };
 }
 
-function literal(lookahead) {
-    switch(lookahead.type) {
+function literal() {
+    switch(lookaheadToken.type) {
         case 'Number':
-            return numericLiteral(lookahead);
+            return numericLiteral();
         case 'String':
-            return stringLiteral(lookahead);
+            return stringLiteral();
     }
+}
+
+function readTokenAndLookahead(...acceptableTokenTypes) {
+    const token = lookaheadToken;
+
+    assertTokenType(token, acceptableTokenTypes);
+
+    lookaheadToken = getNextToken();
+
+    return token;
 }

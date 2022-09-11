@@ -142,17 +142,17 @@ export function getNextToken() {
     return token;
 }
 
-export function assertTokenAndReadValue(lookahead, ...tokenTypes) {
-    if (!lookahead) {
+export function assertTokenType(token, acceptableTokenTypes) {
+    if (!token) {
         throw new Error("Unexpected end of input.");
     }
 
-    if (!tokenTypes.some(tokenType => tokenType === lookahead.type)) {
-    // if (lookahead.type !== tokenType) {
+    if (!acceptableTokenTypes.some(
+        tokenType => tokenType === token.type
+    )) {
         let message = 'Unexpected token. ';
-        message += `Expected [${tokenTypes}], recieved: ${lookahead.type}`;
+        message += `Expected [${acceptableTokenTypes}],`;
+        message += ` recieved: ${lookaheadToken.type}`;
         throw new Error(message);
     }
-
-    return lookahead.value;
 }
