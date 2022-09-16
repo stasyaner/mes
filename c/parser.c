@@ -13,12 +13,12 @@ Node* program() {
     Node* result;
     result = malloc(sizeof(Node));
     result->type = PROGRAM;
-    result->child = numericLiteral();
+    result->child = numeric_literal();
 
     return result;
 }
 
-Node* numericLiteral() {
+Node* numeric_literal() {
     Node* result;
     result = malloc(sizeof(Node));
     result->type = NUMERIC_LITERAL;

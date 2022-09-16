@@ -31,16 +31,17 @@ void print_ast(Node* ast) {
     while(p != NULL) {
         switch(p->type) {
             case PROGRAM:
-                printf("\ttype: Program\n");
-                printf("\tvalue:");
+                printf("\t\"type\": \"Program\"\n");
+                printf("\t\"value\":");
                 break;
             case NUMERIC_LITERAL:
-                printf("\t\ttype: NumericLiteral\n");
-                printf("\t\tvalue: %d\n", p->int_value);
+                printf("\t{\n");
+                printf("\t\t\"type\": \"NumericLiteral\"\n");
+                printf("\t\t\"value\": %d\n", p->int_value);
                 printf("\t}\n");
                 break;
             default:
-                printf("\ttype: Unknown\n");
+                printf("\t\"type\": Unknown\n");
         }
         if(p->child != NULL) {
             p = p->child;
