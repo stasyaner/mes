@@ -73,3 +73,7 @@ char is_single_quote(int c) {
 char is_string_enclosure(int c) {
     return is_double_quote(c) || is_single_quote(c);
 }
+
+char is_space(int c) {
+    return c == ' ';
+}

@@ -32,6 +32,8 @@ Token *get_next_token() {
                     "String can't be enclosed into different quotes.\n");
             exit(1);
         }
+    } else if (is_space(c)) {
+        return get_next_token();
     }
 
     return token;
