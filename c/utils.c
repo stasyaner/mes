@@ -51,3 +51,7 @@ void print_ast(Node* ast) {
     }
     printf("}\n");
 }
+
+char isNumber(int c) {
+    return c >= '0' && c <= '9';
+}

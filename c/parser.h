@@ -10,3 +10,4 @@ typedef struct Node {
 Node* parse();
 Node* program();
 Node* numeric_literal();
+char *read_token_and_lookahead(int acceptable_token_type);
