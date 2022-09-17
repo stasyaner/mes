@@ -6,6 +6,16 @@
 
 Token *lookahead_token = NULL;
 
+char *read_token_and_lookahead(int acceptable_token_type) {
+    Token *token = lookahead_token;
+
+    assert_token_type(token, acceptable_token_type);
+
+    lookahead_token = get_next_token();
+
+    return token->value;
+}
+
 Node *parse() {
     lookahead_token = get_next_token();
     return program();
@@ -30,14 +40,4 @@ Node *numeric_literal() {
     result->int_value = atoi(token);
 
     return result;
-}
-
-char *read_token_and_lookahead(int acceptable_token_type) {
-    Token *token = lookahead_token;
-
-    assert_token_type(token, acceptable_token_type);
-
-    lookahead_token = get_next_token();
-
-    return token->value;
 }
