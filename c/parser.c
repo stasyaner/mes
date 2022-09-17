@@ -8,19 +8,24 @@ Token *lookahead_token = NULL;
 Node *program();
 Node *numeric_literal();
 Node *string_literal();
+Node *literal();
+
+void lookahead() {
+    lookahead_token = get_next_token();
+}
 
 Token *read_token_and_lookahead(int acceptable_token_type) {
     Token *token = lookahead_token;
 
     assert_token_type(token, acceptable_token_type);
 
-    lookahead_token = get_next_token();
+    lookahead();
 
     return token;
 }
 
 Node *parse() {
-    lookahead_token = get_next_token();
+    lookahead();
     return program();
 }
 
@@ -28,9 +33,20 @@ Node *program() {
     Node *result;
     result = malloc(sizeof(Node));
     result->type = program_node;
-    result->child = string_literal();
+    result->child = literal();
 
     return result;
+}
+
+Node *literal() {
+    switch(lookahead_token->type) {
+        case number_token:
+            return numeric_literal();
+        case string_token:
+            return string_literal();
+        default:
+            exit(1);
+    }
 }
 
 Node *numeric_literal() {
