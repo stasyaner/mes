@@ -6,13 +6,13 @@
 
 Token *lookahead_token = NULL;
 
-Node* parse() {
+Node *parse() {
     lookahead_token = get_next_token();
     return program();
 }
 
-Node* program() {
-    Node* result;
+Node *program() {
+    Node *result;
     result = malloc(sizeof(Node));
     result->type = PROGRAM;
     result->child = numeric_literal();
@@ -20,8 +20,8 @@ Node* program() {
     return result;
 }
 
-Node* numeric_literal() {
-    Node* result;
+Node *numeric_literal() {
+    Node *result;
     char *token;
 
     result = malloc(sizeof(Node));

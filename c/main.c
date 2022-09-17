@@ -4,7 +4,7 @@
 #include "utils.h"
 
 int main() {
-    Node* ast = parse();
+    Node *ast = parse();
     print_ast(ast);
     free(ast);
 
