@@ -8,18 +8,30 @@
 
 Token *get_next_token() {
     Token *token;
-    char token_value[BUF_SIZE];
     char c = getchar();
+    char c_stored;
     int i;
 
     token = malloc(sizeof(Token));
-    if(isNumber(c)) {
+    token->value = malloc(sizeof(char) * BUF_SIZE);
+    if(is_number(c)) {
         token->type = number_token;
-        token_value[0] = c;
-        for(i = 1; isNumber(c = getchar()) && i <= BUF_SIZE; i++) {
-            token_value[i] = c;
+        token->value[0] = c;
+        for(i = 1; is_number(c = getchar()) && i <= BUF_SIZE; i++) {
+            token->value[i] = c;
         }
-        token->value = token_value;
+    } else if (is_string_enclosure(c)) {
+        token->type = string_token;
+        c_stored = c;
+        for(i = 0; !is_string_enclosure(c = getchar()) && i <= BUF_SIZE; i++) {
+            token->value[i] = c;
+        }
+        token->value[i+1] = '\0';
+        if(c != c_stored) {
+            fprintf(stderr,
+                    "String can't be enclosed into different quotes.\n");
+            exit(1);
+        }
     }
 
     return token;

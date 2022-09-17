@@ -40,6 +40,12 @@ void print_ast(Node *ast) {
                 printf("\t\t\"value\": %d\n", p->int_value);
                 printf("\t}\n");
                 break;
+            case string_literal_node:
+                printf("\t{\n");
+                printf("\t\t\"type\": \"StringLiteral\"\n");
+                printf("\t\t\"value\": \"%s\"\n", p->str_value);
+                printf("\t}\n");
+                break;
             default:
                 printf("\t\"type\": Unknown\n");
         }
@@ -52,6 +58,18 @@ void print_ast(Node *ast) {
     printf("}\n");
 }
 
-char isNumber(int c) {
+char is_number(int c) {
     return c >= '0' && c <= '9';
+}
+
+char is_double_quote(int c) {
+    return c == '"';
+}
+
+char is_single_quote(int c) {
+    return c == '\'';
+}
+
+char is_string_enclosure(int c) {
+    return is_double_quote(c) || is_single_quote(c);
 }
