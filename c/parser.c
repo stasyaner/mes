@@ -14,7 +14,7 @@ Node *parse() {
 Node *program() {
     Node *result;
     result = malloc(sizeof(Node));
-    result->type = PROGRAM;
+    result->type = program_node;
     result->child = numeric_literal();
 
     return result;
@@ -25,7 +25,7 @@ Node *numeric_literal() {
     char *token;
 
     result = malloc(sizeof(Node));
-    result->type = NUMERIC_LITERAL;
+    result->type = numeric_literal_node;
     token = read_token_and_lookahead(number_token);
     result->int_value = atoi(token);
 

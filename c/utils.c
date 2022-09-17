@@ -30,11 +30,11 @@ void print_ast(Node *ast) {
     printf("{\n");
     while(p != NULL) {
         switch(p->type) {
-            case PROGRAM:
+            case program_node:
                 printf("\t\"type\": \"Program\"\n");
                 printf("\t\"value\":");
                 break;
-            case NUMERIC_LITERAL:
+            case numeric_literal_node:
                 printf("\t{\n");
                 printf("\t\t\"type\": \"NumericLiteral\"\n");
                 printf("\t\t\"value\": %d\n", p->int_value);
