@@ -4,11 +4,17 @@
 #include "parser.h"
 #include "tokenizer.h"
 
+#define LIST_SIZE 255
+
 Token *lookahead_token = NULL;
 Node *program();
 Node *numeric_literal();
 Node *string_literal();
 Node *literal();
+Node *expression();
+Node *expression_statement();
+Node *statement_list();
+Node *statement();
 
 void lookahead() {
     lookahead_token = get_next_token();
@@ -33,9 +39,54 @@ Node *program() {
     Node *result;
     result = malloc(sizeof(Node));
     result->type = program_node;
-    result->child = literal();
+    result->child = statement_list();
 
     return result;
+}
+
+Node *statement_list() {
+    Node *result;
+    Node **list;
+    int i = 0;
+
+    list = malloc(sizeof(Node) * LIST_SIZE);
+    list[i] = statement();
+
+    for(i = 1; lookahead_token; i++) {
+        list[i] = statement();
+    }
+    list[i + 1] = NULL;
+
+    result = malloc(sizeof(Node));
+    result->type = statement_list_node;
+    result->children = list;
+
+    return result;
+}
+
+Node *statement() {
+    return expression_statement();
+}
+
+Node *expression_statement() {
+    Node *result;
+    result = malloc(sizeof(Node));
+    result->type = expression_statement_node;
+    result->child = expression();
+
+    read_token_and_lookahead(semicolon_token); /* 'EOF */
+
+    return result;
+}
+
+Node *expression() {
+    switch(lookahead_token->type) {
+        /* case 'JSXOpening':
+        case 'JSXSelfClosing':
+            return jsxExpression(); */
+        default:
+            return literal();
+    }
 }
 
 Node *literal() {

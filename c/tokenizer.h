@@ -1,4 +1,4 @@
-enum token_type { string_token, number_token };
+enum token_type { string_token, number_token, semicolon_token };
 typedef struct {
     enum token_type type;
     char *value;
