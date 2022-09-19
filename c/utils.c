@@ -51,25 +51,25 @@ void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
 
     switch(node->type) {
         case program_node:
-            printf("%s\"type\": \"Program\"\n", tabs);
+            printf("%s\"type\": \"Program\",\n", tabs);
             printf("%s\"content\":", tabs);
             print_node(node->child, nesting_level, 1);
             break;
         case numeric_literal_node:
             printf(" {\n");
-            printf("\t%s\"type\": \"NumericLiteral\"\n", tabs);
+            printf("\t%s\"type\": \"NumericLiteral\",\n", tabs);
             printf("\t%s\"value\": %d\n", tabs, node->int_value);
             printf("%s}\n", tabs);
             break;
         case string_literal_node:
             printf(" {\n");
-            printf("\t%s\"type\": \"StringLiteral\"\n", tabs);
+            printf("\t%s\"type\": \"StringLiteral\",\n", tabs);
             printf("\t%s\"value\": \"%s\"\n", tabs, node->str_value);
             printf("%s}\n", tabs);
             break;
         case expression_statement_node:
             printf("%s{\n", tabs);
-            printf("\t%s\"type\": \"ExpressionStatement\"\n", tabs);
+            printf("\t%s\"type\": \"ExpressionStatement\",\n", tabs);
             printf("\t%s\"value\":", tabs);
             print_node(node->child, nesting_level + 1, 1);
             if (put_trailing_comma) {
