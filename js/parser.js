@@ -26,10 +26,7 @@ function statementList() {
         list.push(statement());
     }
 
-    return {
-        type: 'StatementList',
-        value: list,
-    };
+    return list;
 }
 
 function statement() {
