@@ -6,12 +6,13 @@ enum node_type {
     statement_list_node
 };
 
-typedef struct Node {
+typedef struct ASTNode {
     enum node_type type;
+    /* void ptr? */
     int int_value;
     char *str_value;
-    struct Node *child;
-    struct Node **children;
+    struct ASTNode *child;
+    struct ASTNode **children;
 } Node;
 
 Node *parse();
