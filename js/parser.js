@@ -62,7 +62,7 @@ function relationalExpression() {
 function binaryExpressionWrapper(leftExpression, operatorToken) {
     let left = leftExpression();
 
-    while(lookaheadToken.type === 'Relational') {
+    while(lookaheadToken.type === operatorToken) {
         const { value: operator } = readTokenAndLookahead(operatorToken);
         const right = literal();
 
