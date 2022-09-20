@@ -85,7 +85,7 @@ void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
             break;
         default:
             printf(" {\n");
-            printf("%s\"type\": Unknown\n", tabs);
+            printf("\t%s\"type\": \"Unknown\"\n", tabs);
             printf("%s}\n", tabs);
     }
 
