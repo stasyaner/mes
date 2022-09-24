@@ -15,6 +15,9 @@ Node *expression();
 Node *expression_statement();
 Node *statement_list();
 Node *statement();
+Node *literal();
+Node *relational_expression();
+Node *binary_expression_wrapper();
 
 void lookahead() {
     lookahead_token = get_next_token();
@@ -85,8 +88,34 @@ Node *expression() {
         case 'JSXSelfClosing':
             return jsxExpression(); */
         default:
-            return literal();
+            return relational_expression();
     }
+}
+
+Node *relational_expression() {
+    return binary_expression_wrapper(*literal, relational_token);
+}
+
+Node *binary_expression_wrapper(
+    Node *(*left_expression)(),
+    enum token_type operator_token
+) {
+    Node *left = left_expression();
+    Node *right;
+    Node *temp_left;
+
+    while(lookahead_token && (lookahead_token->type == operator_token)) {
+        Token *op_token = read_token_and_lookahead(operator_token);
+        right = literal();
+        temp_left = left;
+
+        left->type = binary_expression_node;
+        left->left = temp_left;
+        left->right = right;
+        left->operator = op_token->value;
+    }
+
+    return left;
 }
 
 Node *literal() {

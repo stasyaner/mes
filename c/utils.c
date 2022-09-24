@@ -139,3 +139,11 @@ char is_semicolon(int c) {
 char is_linebreak(int c) {
     return c == '\n';
 }
+
+char is_opening_angle_bracket(int c) {
+    return c == '<';
+}
+
+char is_closing_angle_bracket(int c) {
+    return c == '>';
+}

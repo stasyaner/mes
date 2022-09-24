@@ -47,9 +47,15 @@ Token *get_next_token() {
         token->type = semicolon_token;
         token->value[0] = c;
         token->value[1] = '\0';
+    } else if(is_opening_angle_bracket(c) || is_closing_angle_bracket(c)) {
+        token->type = relational_token;
+        token->value[0] = c;
+        token->value[1] = '\0';
     } else if (is_space(c) || is_linebreak(c)) {
         return get_next_token();
     } else {
+        /* Supposed to mean EOF "token", but maybe sould throw
+           "unrecognized token" error? */
         return NULL;
     }
 

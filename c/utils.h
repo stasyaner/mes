@@ -6,3 +6,5 @@ char is_string_enclosure(int c);
 char is_space(int c);
 char is_semicolon(int c);
 char is_linebreak(int c);
+char is_opening_angle_bracket(int c);
+char is_closing_angle_bracket(int c);
