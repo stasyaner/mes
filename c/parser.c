@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include "parser.h"
 #include "tokenizer.h"
 
@@ -107,7 +108,8 @@ Node *binary_expression_wrapper(
     while(lookahead_token && (lookahead_token->type == operator_token)) {
         Token *op_token = read_token_and_lookahead(operator_token);
         right = literal();
-        temp_left = left;
+        temp_left = malloc(sizeof(Node));
+        memcpy(temp_left, left, sizeof(Node));
 
         left->type = binary_expression_node;
         left->left = temp_left;

@@ -59,20 +59,28 @@ void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
             printf(" {\n");
             printf("\t%s\"type\": \"NumericLiteral\",\n", tabs);
             printf("\t%s\"value\": %d\n", tabs, node->int_value);
-            printf("%s}\n", tabs);
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
             break;
         case string_literal_node:
             printf(" {\n");
             printf("\t%s\"type\": \"StringLiteral\",\n", tabs);
             printf("\t%s\"value\": \"%s\"\n", tabs, node->str_value);
-            printf("%s}\n", tabs);
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
             break;
         case expression_statement_node:
             printf("%s{\n", tabs);
             printf("\t%s\"type\": \"ExpressionStatement\",\n", tabs);
             printf("\t%s\"value\":", tabs);
-            print_node(node->child, nesting_level + 1, 1);
-            if (put_trailing_comma) {
+            print_node(node->child, nesting_level + 1, 0);
+            if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
                 printf("%s}\n", tabs);
@@ -82,6 +90,20 @@ void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
             printf(" [\n");
             print_node_list((const Node **)node->children, nesting_level + 1);
             printf("%s]\n", tabs);
+            break;
+        case binary_expression_node:
+            printf(" {\n");
+            printf("\t%s\"type\": \"BinaryExpression\",\n", tabs);
+            printf("\t%s\"left\":", tabs);
+            print_node(node->left, nesting_level + 1, 1);
+            printf("\t%s\"right\":", tabs);
+            print_node(node->right, nesting_level + 1, 1);
+            printf("\t%s\"operator\": \"%s\"\n", tabs, node->operator);
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
             break;
         default:
             printf(" {\n");
