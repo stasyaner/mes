@@ -6,7 +6,7 @@
 
 #define BUF_SIZE 255
 
-int cached_c = '\0';
+int c_cached = '\0';
 
 Token *get_next_token() {
     Token *token;
@@ -14,9 +14,9 @@ Token *get_next_token() {
     char c_stored;
     int i;
 
-    if(cached_c != '\0') {
-        c = cached_c;
-        cached_c = '\0';
+    if(c_cached != '\0') {
+        c = c_cached;
+        c_cached = '\0';
     } else {
         c = getchar();
     }
@@ -30,7 +30,7 @@ Token *get_next_token() {
             token->value[i] = c;
         }
         token->value[i + 1] = '\0';
-        cached_c = c;
+        c_cached = c;
     } else if (is_string_enclosure(c)) {
         token->type = string_token;
         c_stored = c;
