@@ -108,7 +108,7 @@ function jsxContent() {
     const token = readTokenAndLookahead('JSXText');
     return {
         type: 'JSXText',
-        value: token,
+        value: token.value,
     };
 }
 
