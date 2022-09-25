@@ -4,6 +4,7 @@
 #include "utils.h"
 
 #define BUF_SIZE 255
+#define JSON_NULL_STRING "null"
 
 void print_node(const Node *node, int nesting_level, char put_trailing_comma);
 void print_node_list(const Node **list, int nesting_level);
@@ -47,7 +48,15 @@ char *get_tabs(int nesting_level) {
 void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
     char *tabs = get_tabs(nesting_level);
 
-    if(!node) return;
+    if(!node) {
+        printf(" null");
+        if(put_trailing_comma) {
+            printf(",\n");
+        } else {
+            printf("\n");
+        }
+        return;
+    }
 
     switch(node->type) {
         case program_node:
@@ -105,6 +114,33 @@ void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
                 printf("%s}\n", tabs);
             }
             break;
+        case jsx_expression_node:
+            printf(" {\n");
+            printf("\t%s\"type\": \"JSXExpression\",\n", tabs);
+            printf("\t%s\"openingElement\":", tabs);
+            print_node(node->opening_element, nesting_level + 1, 1);
+            printf("\t%s\"value\":", tabs);
+            print_node(node->child, nesting_level + 1, 1);
+            printf("\t%s\"closingElement\":", tabs);
+            print_node(node->closing_element, nesting_level + 1, 0);
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
+            break;
+        case jsx_opening_element_node:
+            printf(" {\n");
+            printf("\t%s\"type\": \"JSXOpeningElement\",\n", tabs);
+            printf("\t%s\"isSelfClosing\": ", tabs);
+            printf("%s\n", node->is_self_closing ? "true" : "false");
+            printf("\t%s\"value\": \"%s\"\n", tabs, node->str_value);
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
+            break;
         default:
             printf(" {\n");
             printf("\t%s\"type\": \"Unknown\"\n", tabs);
@@ -120,7 +156,7 @@ void print_node_list(const Node **list, int nesting_level) {
     const Node *p;
 
     for(i = 0; (p = list[i]); i++) {
-        if (list[i + 1] == NULL) {
+        if(list[i + 1] == NULL) {
             is_last = 0;
         }
         print_node(p, nesting_level, is_last);
@@ -168,4 +204,7 @@ char is_opening_angle_bracket(int c) {
 
 char is_closing_angle_bracket(int c) {
     return c == '>';
+}
+char is_slash(int c) {
+    return c == '/';
 }

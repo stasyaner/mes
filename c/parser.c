@@ -19,6 +19,8 @@ Node *statement();
 Node *literal();
 Node *relational_expression();
 Node *binary_expression_wrapper();
+Node *jsx_expression();
+Node *jsx_opening_element();
 
 void lookahead() {
     lookahead_token = get_next_token();
@@ -85,9 +87,9 @@ Node *expression_statement() {
 
 Node *expression() {
     switch(lookahead_token->type) {
-        /* case 'JSXOpening':
-        case 'JSXSelfClosing':
-            return jsxExpression(); */
+        case jsx_opening_token:
+        case jsx_self_closing_token:
+            return jsx_expression();
         default:
             return relational_expression();
     }
@@ -119,6 +121,56 @@ Node *binary_expression_wrapper(
 
     return left;
 }
+
+Node *jsx_expression() {
+    Node *result;
+    Node *opening_element = jsx_opening_element();
+    Node *content = NULL;
+    Node *closing_element = NULL;
+
+    /* if (!opening_element->is_self_closing) {
+        content = jsx_content();
+        closing_element = jsx_closing_element();
+    } */
+
+    result = malloc(sizeof(Node));
+    result->type = jsx_expression_node;
+    result->opening_element = opening_element;
+    result->child = content;
+    result->closing_element = closing_element;
+
+    return result;
+}
+
+Node *jsx_opening_element() {
+    Node *result;
+    Token *token;
+
+    result = malloc(sizeof(Node));
+    result->type = jsx_opening_element_node;
+    token = read_token_and_lookahead(jsx_self_closing_token);
+    /* const token = read_token_and_lookahead('JSXOpening', 'JSXSelfClosing'); */
+    result->str_value = token->value;
+    result->is_self_closing = (token->type == jsx_self_closing_token);
+
+    return result;
+}
+
+/* Node *jsx_content() {
+    const token = readTokenAndLookahead('JSXText');
+    return {
+        type: 'JSXText',
+        value: token,
+    };
+}
+
+Node *jsx_closing_element() {
+    const token = readTokenAndLookahead('JSXClosing');
+    return {
+        type: 'JSXClosingElement',
+        value: token,
+    }
+} */
 
 Node *literal() {
     switch(lookahead_token->type) {
