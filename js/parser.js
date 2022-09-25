@@ -116,7 +116,7 @@ function jsxClosingElement() {
     const token = readTokenAndLookahead('JSXClosing');
     return {
         type: 'JSXClosingElement',
-        value: token,
+        value: token.value,
     }
 }
 
