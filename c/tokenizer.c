@@ -107,14 +107,17 @@ Token *get_next_token() {
     return token;
 }
 
-void assert_token_type(Token *token, int acceptable_token_type) {
+char check_token_type(Token *token, int acceptable_token_type) {
     if(token == NULL) {
         fprintf(stderr, "Unexpected end of input.\n");
         exit(1);
     }
 
     if(token->type != acceptable_token_type) {
-        fprintf(stderr, "Unexpected token.\n");
-        exit(1);
+        /* fprintf(stderr, "Unexpected token.\n"); */
+
+        return 1;
     }
+
+    return 0;
 }

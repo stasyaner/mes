@@ -21,15 +21,39 @@ Node *relational_expression();
 Node *binary_expression_wrapper();
 Node *jsx_expression();
 Node *jsx_opening_element();
+Node *jsx_content();
+Node *jsx_closing_element();
+
+#define read_token_and_lookahead(tt)\
+        read_token_and_lookahead_va(1, tt);
+#define read_token_and_lookahead2(tt1, tt2)\
+        read_token_and_lookahead_va(2, tt1, tt2);
 
 void lookahead() {
     lookahead_token = get_next_token();
 }
 
-Token *read_token_and_lookahead(int acceptable_token_type) {
+Token *read_token_and_lookahead_va(int n, ...) {
+    va_list vl;
+    enum token_type tt;
+    int i;
+    char check_result;
     Token *token = lookahead_token;
 
-    assert_token_type(token, acceptable_token_type);
+    va_start(vl, n);
+    for(i = 0; i < n; i++) {
+        tt = va_arg(vl, enum token_type);
+        check_result = check_token_type(token, tt);
+        if(!check_result) {
+            break;
+        }
+    }
+    va_end(vl);
+
+    if(check_result) {
+        fprintf(stderr, "Unexpected token.\n");
+        exit(1);
+    }
 
     lookahead();
 
@@ -148,8 +172,8 @@ Node *jsx_opening_element() {
 
     result = malloc(sizeof(Node));
     result->type = jsx_opening_element_node;
-    token = read_token_and_lookahead(jsx_self_closing_token);
-    /* const token = read_token_and_lookahead('JSXOpening', 'JSXSelfClosing'); */
+    token = read_token_and_lookahead2(
+        jsx_opening_token, jsx_self_closing_token);
     result->str_value = token->value;
     result->is_self_closing = (token->type == jsx_self_closing_token);
 
@@ -157,19 +181,25 @@ Node *jsx_opening_element() {
 }
 
 /* Node *jsx_content() {
-    const token = readTokenAndLookahead('JSXText');
-    return {
-        type: 'JSXText',
-        value: token,
-    };
+    Node *result;
+    Token *token = read_token_and_lookahead(jsx_text_token);
+
+    result = malloc(sizeof(Node));
+    result->type = jsx_content_node;
+    result->str_value = token->value;
+
+    return result;
 }
 
 Node *jsx_closing_element() {
-    const token = readTokenAndLookahead('JSXClosing');
-    return {
-        type: 'JSXClosingElement',
-        value: token,
-    }
+    Node *result;
+    Token *token = read_token_and_lookahead(jsx_closing_token);
+
+    result = malloc(sizeof(Node));
+    result->type = jsx_closing_element_node;
+    result->str_value = token->value;
+
+    return result;
 } */
 
 Node *literal() {

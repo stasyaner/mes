@@ -14,5 +14,5 @@ typedef struct {
     char *value;
 } Token;
 
-void assert_token_type(Token *token, int acceptable_token_type);
+char check_token_type(Token *token, int acceptable_token_type);
 Token *get_next_token();
