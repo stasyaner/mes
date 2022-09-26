@@ -6,8 +6,8 @@
 #define BUF_SIZE 255
 #define JSON_NULL_STRING "null"
 
-void print_node(const Node *node, int nesting_level, char put_trailing_comma);
-void print_node_list(const Node **list, int nesting_level);
+static void print_node(const Node *node, int nesting_level, char put_trailing_comma);
+static void print_node_list(const Node **list, int nesting_level);
 
 /* char *get_string_type_from_enum(enum node_type type) {
     switch(type) {
@@ -31,7 +31,7 @@ void print_node_list(const Node **list, int nesting_level);
     }
 } */
 
-char *get_tabs(int nesting_level) {
+static char *get_tabs(int nesting_level) {
     char *tabs;
     int i;
 
@@ -45,7 +45,7 @@ char *get_tabs(int nesting_level) {
     return tabs;
 }
 
-void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
+static void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
     char *tabs = get_tabs(nesting_level);
 
     if(!node) {
@@ -150,7 +150,7 @@ void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
     free(tabs);
 }
 
-void print_node_list(const Node **list, int nesting_level) {
+static void print_node_list(const Node **list, int nesting_level) {
     int i;
     char is_last = 1;
     const Node *p;

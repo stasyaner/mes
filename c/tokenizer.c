@@ -6,8 +6,8 @@
 
 #define BUF_SIZE 255
 
-int c_cached = '\0';
-char is_jsx_opened = 0;
+static int c_cached = '\0';
+static char is_jsx_opened = 0;
 
 Token *get_next_token() {
     Token *token;
