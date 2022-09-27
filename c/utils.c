@@ -67,7 +67,7 @@ static void print_node(const Node *node, int nesting_level, char put_trailing_co
         case numeric_literal_node:
             printf(" {\n");
             printf("\t%s\"type\": \"NumericLiteral\",\n", tabs);
-            printf("\t%s\"value\": %d\n", tabs, node->int_value);
+            printf("\t%s\"value\": %s\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -77,7 +77,7 @@ static void print_node(const Node *node, int nesting_level, char put_trailing_co
         case string_literal_node:
             printf(" {\n");
             printf("\t%s\"type\": \"StringLiteral\",\n", tabs);
-            printf("\t%s\"value\": \"%s\"\n", tabs, node->str_value);
+            printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -134,7 +134,7 @@ static void print_node(const Node *node, int nesting_level, char put_trailing_co
             printf("\t%s\"type\": \"JSXOpeningElement\",\n", tabs);
             printf("\t%s\"isSelfClosing\": ", tabs);
             printf("%s\n", node->is_self_closing ? "true" : "false");
-            printf("\t%s\"value\": \"%s\"\n", tabs, node->str_value);
+            printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -144,7 +144,7 @@ static void print_node(const Node *node, int nesting_level, char put_trailing_co
         case jsx_content_node:
             printf(" {\n");
             printf("\t%s\"type\": \"JSXContent\",\n", tabs);
-            printf("\t%s\"value\": \"%s\"\n", tabs, node->str_value);
+            printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -154,7 +154,7 @@ static void print_node(const Node *node, int nesting_level, char put_trailing_co
         case jsx_closing_element_node:
             printf(" {\n");
             printf("\t%s\"type\": \"JSXClosingElement\",\n", tabs);
-            printf("\t%s\"value\": \"%s\"\n", tabs, node->str_value);
+            printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {

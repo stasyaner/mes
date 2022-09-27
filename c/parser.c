@@ -147,7 +147,7 @@ static Node *jsx_opening_element() {
     result->type = jsx_opening_element_node;
     token = read_token_and_lookahead2(
         jsx_opening_token, jsx_self_closing_token);
-    result->str_value = token->value;
+    result->value = token->value;
     result->is_self_closing = (token->type == jsx_self_closing_token);
 
     return result;
@@ -159,7 +159,7 @@ static Node *jsx_content() {
 
     result = malloc(sizeof(Node));
     result->type = jsx_content_node;
-    result->str_value = token->value;
+    result->value = token->value;
 
     return result;
 }
@@ -170,7 +170,7 @@ static Node *jsx_closing_element() {
 
     result = malloc(sizeof(Node));
     result->type = jsx_closing_element_node;
-    result->str_value = token->value;
+    result->value = token->value;
 
     return result;
 }
@@ -193,7 +193,7 @@ static Node *numeric_literal() {
     result = malloc(sizeof(Node));
     result->type = numeric_literal_node;
     token = read_token_and_lookahead(number_token);
-    result->int_value = atoi(token->value);
+    result->value = token->value;
 
     return result;
 }
@@ -205,7 +205,7 @@ static Node *string_literal() {
     result = malloc(sizeof(Node));
     result->type = string_literal_node;
     token = read_token_and_lookahead(string_token);
-    result->str_value = token->value;
+    result->value = token->value;
 
     return result;
 }
