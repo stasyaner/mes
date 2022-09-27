@@ -45,7 +45,11 @@ static char *get_tabs(int nesting_level) {
     return tabs;
 }
 
-static void print_node(const Node *node, int nesting_level, char put_trailing_comma) {
+static void print_node(
+    const Node *node,
+    int nesting_level,
+    char put_trailing_comma
+) {
     char *tabs = get_tabs(nesting_level);
 
     if(!node) {
