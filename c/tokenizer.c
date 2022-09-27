@@ -24,7 +24,24 @@ Token *get_next_token() {
 
     token = malloc(sizeof(Token));
     token->value = malloc(sizeof(char) * BUF_SIZE);
-    if(is_number(c)) {
+    if(is_jsx_opened) {
+        token->type = jsx_text_token;
+        token->value[0] = c;
+        for(
+            i = 1;
+            !is_opening_angle_bracket(c = getchar()) && i < BUF_SIZE;
+            i++
+        ) {
+            token->value[i] = c;
+            /* if (isEOF(c)) {
+                throw new Error(
+                    'Unexpected end of input while reading JSX text.'
+                );
+            } */
+        }
+        c_cached = c;
+        is_jsx_opened = 0;
+    } else if(is_number(c)) {
         token->type = number_token;
         token->value[0] = c;
         for(i = 1; is_number(c = getchar()) && i < BUF_SIZE; i++) {
@@ -57,6 +74,8 @@ Token *get_next_token() {
         c = getchar();
         if(is_slash(c)) {
             token->type = jsx_closing_token;
+            i = 0;
+            is_jsx_opened = 0;
         } else if(is_space(c)) {
             token->type = relational_token;
             token->value[0] = c_stored;
@@ -64,12 +83,13 @@ Token *get_next_token() {
         } else {
             token->type = jsx_opening_token;
             token->value[0] = c;
+            i = 1;
             is_jsx_opened = 1;
         }
 
         if(token->type != relational_token) {
             for(
-                i = 1;
+                ;
                 !is_closing_angle_bracket(c = getchar()) && i < BUF_SIZE;
                 i++
             ) {

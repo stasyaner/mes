@@ -141,6 +141,26 @@ static void print_node(const Node *node, int nesting_level, char put_trailing_co
                 printf("%s}\n", tabs);
             }
             break;
+        case jsx_content_node:
+            printf(" {\n");
+            printf("\t%s\"type\": \"JSXContent\",\n", tabs);
+            printf("\t%s\"value\": \"%s\"\n", tabs, node->str_value);
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
+            break;
+        case jsx_closing_element_node:
+            printf(" {\n");
+            printf("\t%s\"type\": \"JSXClosingElement\",\n", tabs);
+            printf("\t%s\"value\": \"%s\"\n", tabs, node->str_value);
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
+            break;
         default:
             printf(" {\n");
             printf("\t%s\"type\": \"Unknown\"\n", tabs);

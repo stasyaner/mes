@@ -25,8 +25,8 @@ static Node *relational_expression();
 static Node *binary_expression_wrapper();
 static Node *jsx_expression();
 static Node *jsx_opening_element();
-/* static Node *jsx_content();
-static Node *jsx_closing_element(); */
+static Node *jsx_content();
+static Node *jsx_closing_element();
 
 static Token *lookahead_token = NULL;
 static void lookahead() {
@@ -125,10 +125,10 @@ static Node *jsx_expression() {
     Node *content = NULL;
     Node *closing_element = NULL;
 
-    /* if (!opening_element->is_self_closing) {
+    if (!opening_element->is_self_closing) {
         content = jsx_content();
         closing_element = jsx_closing_element();
-    } */
+    }
 
     result = malloc(sizeof(Node));
     result->type = jsx_expression_node;
@@ -153,7 +153,7 @@ static Node *jsx_opening_element() {
     return result;
 }
 
-/* static Node *jsx_content() {
+static Node *jsx_content() {
     Node *result;
     Token *token = read_token_and_lookahead(jsx_text_token);
 
@@ -173,7 +173,7 @@ static Node *jsx_closing_element() {
     result->str_value = token->value;
 
     return result;
-} */
+}
 
 static Node *literal() {
     switch(lookahead_token->type) {
