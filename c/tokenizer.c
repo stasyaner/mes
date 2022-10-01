@@ -9,6 +9,15 @@
 static int c_cached = '\0';
 static char is_jsx_opened = 0;
 
+/* typedef struct Specification {
+    char (*qualification_func)(int);
+    Token *(*handler_func)(int);
+} Spec;
+Token *handle_number(int c);
+static const Spec spec[] = {
+    { is_number, handle_number }
+}; */
+
 Token *get_next_token() {
     Token *token;
     char c;
