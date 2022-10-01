@@ -127,7 +127,7 @@ Token *get_next_token() {
     return token;
 }
 
-char check_token_type(Token *token, int acceptable_token_type) {
+char check_token_type(Token *token, enum token_type acceptable_token_type) {
     if(token == NULL) {
         fprintf(stderr, "Unexpected end of input.\n");
         exit(1);
