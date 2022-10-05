@@ -53,9 +53,7 @@ static Node *statement_list() {
     int i = 0;
 
     list = malloc(sizeof(Node) * LIST_SIZE);
-    list[i] = statement();
-
-    for(i = 1; lookahead_token; i++) {
+    for(i = 0; lookahead_token && i < LIST_SIZE; i++) {
         list[i] = statement();
     }
     list[i + 1] = NULL;
