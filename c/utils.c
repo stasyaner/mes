@@ -137,7 +137,7 @@ static void print_node(
             printf(" {\n");
             printf("\t%s\"type\": \"JSXOpeningElement\",\n", tabs);
             printf("\t%s\"isSelfClosing\": ", tabs);
-            printf("%s\n", node->is_self_closing ? "true" : "false");
+            printf("%s,\n", node->is_self_closing ? "true" : "false");
             printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
