@@ -9,3 +9,4 @@ char is_linebreak(int c);
 char is_opening_angle_bracket(int c);
 char is_closing_angle_bracket(int c);
 char is_slash(int c);
+char is_alpha(int c);

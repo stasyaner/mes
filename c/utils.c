@@ -228,6 +228,12 @@ char is_opening_angle_bracket(int c) {
 char is_closing_angle_bracket(int c) {
     return c == '>';
 }
+
 char is_slash(int c) {
     return c == '/';
+}
+
+char is_alpha(int c) {
+    return (c >= 'a' && c <= 'z') ||
+           (c >= 'A' && c <= 'Z');
 }
