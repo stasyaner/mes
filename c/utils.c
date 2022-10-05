@@ -175,15 +175,14 @@ static void print_node(
 }
 
 static void print_node_list(const Node **list, int nesting_level) {
-    int i;
     char is_last = 1;
-    const Node *p;
+    const Node **p;
 
-    for(i = 0; (p = list[i]); i++) {
-        if(list[i + 1] == NULL) {
+    for(p = list; *p; p++) {
+        if(!*(p + 1)) {
             is_last = 0;
         }
-        print_node(p, nesting_level, is_last);
+        print_node(*p, nesting_level, is_last);
     }
 }
 
