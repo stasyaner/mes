@@ -1,5 +1,5 @@
 enum node_type {
-    program_node,
+    file_node,
     numeric_literal_node,
     string_literal_node,
     expression_statement_node,

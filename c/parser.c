@@ -12,7 +12,7 @@
         read_token_and_lookahead_va(2, tt1, tt2);
 
 static Token *read_token_and_lookahead_va(int n, ...);
-static Node *program();
+static Node *file();
 static Node *numeric_literal();
 static Node *string_literal();
 static Node *literal();
@@ -35,13 +35,13 @@ static void lookahead() {
 
 Node *parse() {
     lookahead();
-    return program();
+    return file();
 }
 
-static Node *program() {
+static Node *file() {
     Node *result;
     result = malloc(sizeof(Node));
-    result->type = program_node;
+    result->type = file_node;
     result->child = statement_list();
 
     return result;

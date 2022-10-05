@@ -63,8 +63,8 @@ static void print_node(
     }
 
     switch(node->type) {
-        case program_node:
-            printf("%s\"type\": \"Program\",\n", tabs);
+        case file_node:
+            printf("%s\"type\": \"File\",\n", tabs);
             printf("%s\"content\":", tabs);
             print_node(node->child, nesting_level, 1);
             break;
