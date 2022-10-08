@@ -23,7 +23,7 @@ static Node *statement_list();
 static Node *statement();
 static Node *literal();
 static Node *relational_expression();
-static Node *binary_expression_wrapper();
+/* static Node *binary_expression_wrapper(); */
 static Node *jsx_expression();
 static Node *jsx_opening_element();
 static Node *jsx_content();
@@ -92,10 +92,32 @@ static Node *expression() {
 }
 
 static Node *relational_expression() {
-    return binary_expression_wrapper(*literal, opening_angle_token);
+    Node *left = literal();
+    Node *right;
+    Node *temp_left;
+
+    while(
+        lookahead_token && (
+            (lookahead_token->type == opening_angle_token) ||
+            (lookahead_token->type == closing_angle_token)
+    )) {
+        char *operator = lookahead_token->value;
+
+        lookahead();
+        right = literal();
+        temp_left = malloc(sizeof(Node));
+        memcpy(temp_left, left, sizeof(Node));
+
+        left->type = binary_expression_node;
+        left->left = temp_left;
+        left->right = right;
+        left->operator = operator;
+    }
+
+    return left;
 }
 
-static Node *binary_expression_wrapper(
+/* static Node *binary_expression_wrapper(
     Node *(*left_expression)(),
     enum token_type operator_token
 ) {
@@ -116,7 +138,7 @@ static Node *binary_expression_wrapper(
     }
 
     return left;
-}
+} */
 
 static Node *jsx_expression() {
     Node *result;
