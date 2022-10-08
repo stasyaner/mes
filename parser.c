@@ -151,7 +151,9 @@ static Node *jsx_expression() {
     Node *closing_element = NULL;
 
     if (!opening_element->is_self_closing) {
-        content = jsx_content();
+        if(lookahead_token->type != opening_angle_token) {
+            content = jsx_content();
+        }
         closing_element = jsx_closing_element();
     }
 
@@ -170,7 +172,9 @@ static Node *jsx_opening_element() {
     Node *id = NULL;
 
     read_token_and_lookahead(opening_angle_token);
-    id = identifier();
+    if(lookahead_token->type == identifier_token) {
+        id = identifier();
+    }
     if(lookahead_token->type == slash_token) {
         is_self_closing = 1;
         lookahead();
@@ -221,11 +225,13 @@ static Node *jsx_content() {
 
 static Node *jsx_closing_element() {
     Node *result;
-    Node *id;
+    Node *id = NULL;
 
     read_token_and_lookahead(opening_angle_token);
     read_token_and_lookahead(slash_token);
-    id = identifier();
+    if(lookahead_token->type == identifier_token) {
+        id = identifier();
+    }
     read_token_and_lookahead(closing_angle_token);
 
     result = malloc(sizeof(Node));
