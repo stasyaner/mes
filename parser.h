@@ -2,6 +2,7 @@ enum node_type {
     file_node,
     numeric_literal_node,
     string_literal_node,
+    identifier_node,
     expression_statement_node,
     statement_list_node,
     binary_expression_node,

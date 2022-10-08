@@ -9,3 +9,13 @@
 <img />;
 "asdas";
 <p>hello world of paragraph</p>;
+775;
+"asd";
+<br />;
+x<y>z;
+a < b < c;
+l > k;
+a > 5;
+z < 2;
+1 > g;
+8>zxc;

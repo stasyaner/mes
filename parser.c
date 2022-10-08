@@ -21,7 +21,9 @@ static Node *expression();
 static Node *expression_statement();
 static Node *statement_list();
 static Node *statement();
+static Node *identifier();
 static Node *literal();
+static Node *primary_expression();
 static Node *relational_expression();
 /* static Node *binary_expression_wrapper(); */
 static Node *jsx_expression();
@@ -85,14 +87,16 @@ static Node *expression() {
     switch(lookahead_token->type) {
         case number_token:
         case string_token:
+        case identifier_token:
             return relational_expression();
         default:
+        case opening_angle_token:
             return jsx_expression();
     }
 }
 
 static Node *relational_expression() {
-    Node *left = literal();
+    Node *left = primary_expression();
     Node *right;
     Node *temp_left;
 
@@ -104,7 +108,7 @@ static Node *relational_expression() {
         char *operator = lookahead_token->value;
 
         lookahead();
-        right = literal();
+        right = primary_expression();
         temp_left = malloc(sizeof(Node));
         memcpy(temp_left, left, sizeof(Node));
 
@@ -163,10 +167,10 @@ static Node *jsx_expression() {
 static Node *jsx_opening_element() {
     char is_self_closing = 0;
     Node *result;
-    Token *identifier = NULL;
+    Node *id = NULL;
 
     read_token_and_lookahead(opening_angle_token);
-    identifier = read_token_and_lookahead(identifier_token);
+    id = identifier();
     if(lookahead_token->type == slash_token) {
         is_self_closing = 1;
         lookahead();
@@ -175,7 +179,7 @@ static Node *jsx_opening_element() {
 
     result = malloc(sizeof(Node));
     result->type = jsx_opening_element_node;
-    result->value = identifier->value;
+    result->child = id;
     result->is_self_closing = is_self_closing;
 
     return result;
@@ -217,16 +221,39 @@ static Node *jsx_content() {
 
 static Node *jsx_closing_element() {
     Node *result;
-    Token *identifier;
+    Node *id;
 
     read_token_and_lookahead(opening_angle_token);
     read_token_and_lookahead(slash_token);
-    identifier = read_token_and_lookahead(identifier_token);
+    id = identifier();
     read_token_and_lookahead(closing_angle_token);
 
     result = malloc(sizeof(Node));
     result->type = jsx_closing_element_node;
-    result->value = identifier->value;
+    result->child = id;
+
+    return result;
+}
+
+static Node *primary_expression() {
+    switch(lookahead_token->type) {
+        case number_token:
+        case string_token:
+            return literal();
+        default:
+        case identifier_token:
+            return identifier();
+    }
+}
+
+static Node *identifier() {
+    Node *result;
+    Token *token;
+
+    result = malloc(sizeof(Node));
+    result->type = identifier_node;
+    token = read_token_and_lookahead(identifier_token);
+    result->value = token->value;
 
     return result;
 }
@@ -235,10 +262,9 @@ static Node *literal() {
     switch(lookahead_token->type) {
         case number_token:
             return numeric_literal();
+        default:
         case string_token:
             return string_literal();
-        default:
-            exit(1);
     }
 }
 

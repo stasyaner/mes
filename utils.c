@@ -88,6 +88,16 @@ static void print_node(
                 printf("%s}\n", tabs);
             }
             break;
+        case identifier_node:
+            printf(" {\n");
+            printf("\t%s\"type\": \"Identifier\",\n", tabs);
+            printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
+            break;
         case expression_statement_node:
             printf("%s{\n", tabs);
             printf("\t%s\"type\": \"ExpressionStatement\",\n", tabs);
@@ -138,7 +148,8 @@ static void print_node(
             printf("\t%s\"type\": \"JSXOpeningElement\",\n", tabs);
             printf("\t%s\"isSelfClosing\": ", tabs);
             printf("%s,\n", node->is_self_closing ? "true" : "false");
-            printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
+            printf("\t%s\"value\":", tabs);
+            print_node(node->child, nesting_level + 1, 0);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -158,7 +169,8 @@ static void print_node(
         case jsx_closing_element_node:
             printf(" {\n");
             printf("\t%s\"type\": \"JSXClosingElement\",\n", tabs);
-            printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
+            printf("\t%s\"value\":", tabs);
+            print_node(node->child, nesting_level + 1, 0);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -187,7 +199,6 @@ static void print_node_list(const Node **list, int nesting_level) {
 }
 
 void print_ast(const Node *ast) {
-    printf("Printing AST:\n");
     printf("{\n");
     print_node(ast, 1, 1);
     printf("}\n");
