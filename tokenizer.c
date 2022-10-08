@@ -95,6 +95,22 @@ Token *get_next_token() {
         token->type = slash_token;
         token->value[0] = c;
         token->value[1] = '\0';
+    } else if(is_opening_curly(c)) {
+        token->type = opening_curly_token;
+        token->value[0] = c;
+        token->value[1] = '\0';
+    } else if(is_closing_curly(c)) {
+        token->type = closing_curly_token;
+        token->value[0] = c;
+        token->value[1] = '\0';
+    } else if(is_pipe(c)) {
+        token->type = pipe_token;
+        token->value[0] = c;
+        token->value[1] = '\0';
+    } else if(is_ampersand(c)) {
+        token->type = ampersand_token;
+        token->value[0] = c;
+        token->value[1] = '\0';
     } else if(is_alpha(c)) {
         token->type = identifier_token;
         token->value[0] = c;

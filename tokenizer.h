@@ -5,7 +5,11 @@ enum token_type {
     opening_angle_token,
     closing_angle_token,
     identifier_token,
-    slash_token
+    slash_token,
+    opening_curly_token,
+    closing_curly_token,
+    ampersand_token,
+    pipe_token
 };
 
 typedef struct {

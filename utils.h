@@ -13,3 +13,5 @@ char is_alpha(int c);
 char is_underscore(int c);
 char is_opening_curly(int c);
 char is_closing_curly(int c);
+char is_pipe(int c);
+char is_ampersand(int c);
