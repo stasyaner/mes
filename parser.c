@@ -6,6 +6,7 @@
 #include "tokenizer.h"
 
 #define LIST_SIZE 255
+#define JSX_CONTENT_LENGTH 255
 #define read_token_and_lookahead(tt)\
         read_token_and_lookahead_va(1, tt);
 #define read_token_and_lookahead2(tt1, tt2)\
@@ -82,16 +83,16 @@ static Node *expression_statement() {
 
 static Node *expression() {
     switch(lookahead_token->type) {
-        case jsx_opening_token:
-        case jsx_self_closing_token:
-            return jsx_expression();
-        default:
+        case number_token:
+        case string_token:
             return relational_expression();
+        default:
+            return jsx_expression();
     }
 }
 
 static Node *relational_expression() {
-    return binary_expression_wrapper(*literal, relational_token);
+    return binary_expression_wrapper(*literal, opening_angle_token);
 }
 
 static Node *binary_expression_wrapper(
@@ -138,37 +139,72 @@ static Node *jsx_expression() {
 }
 
 static Node *jsx_opening_element() {
+    char is_self_closing = 0;
     Node *result;
-    Token *token;
+    Token *identifier = NULL;
+
+    read_token_and_lookahead(opening_angle_token);
+    identifier = read_token_and_lookahead(identifier_token);
+    if(lookahead_token->type == slash_token) {
+        is_self_closing = 1;
+        lookahead();
+    }
+    read_token_and_lookahead(closing_angle_token);
 
     result = malloc(sizeof(Node));
     result->type = jsx_opening_element_node;
-    token = read_token_and_lookahead2(
-        jsx_opening_token, jsx_self_closing_token);
-    result->value = token->value;
-    result->is_self_closing = (token->type == jsx_self_closing_token);
+    result->value = identifier->value;
+    result->is_self_closing = is_self_closing;
 
     return result;
 }
 
 static Node *jsx_content() {
     Node *result;
-    Token *token = read_token_and_lookahead(jsx_text_token);
+    char *p;
 
     result = malloc(sizeof(Node));
     result->type = jsx_content_node;
-    result->value = token->value;
+    result->value = malloc(JSX_CONTENT_LENGTH);
+    p = result->value;
+
+    while(lookahead_token->type != opening_angle_token) {
+        int l = strlen(lookahead_token->value);
+        int l_total = result->value - p;
+
+        if(l_total >= (JSX_CONTENT_LENGTH - 1)) {
+            fprintf(
+                stderr,
+                "JSX text is too long. Max length is %d.\n",
+                JSX_CONTENT_LENGTH
+            );
+            exit(1);
+        }
+
+        strncpy(p, lookahead_token->value, l);
+        *(p + l) = ' ';
+        p += l + 1;
+        free(lookahead_token->value);
+        free(lookahead_token);
+        lookahead();
+    }
+    *(p - 1) = '\0';
 
     return result;
 }
 
 static Node *jsx_closing_element() {
     Node *result;
-    Token *token = read_token_and_lookahead(jsx_closing_token);
+    Token *identifier;
+
+    read_token_and_lookahead(opening_angle_token);
+    read_token_and_lookahead(slash_token);
+    identifier = read_token_and_lookahead(identifier_token);
+    read_token_and_lookahead(closing_angle_token);
 
     result = malloc(sizeof(Node));
     result->type = jsx_closing_element_node;
-    result->value = token->value;
+    result->value = identifier->value;
 
     return result;
 }

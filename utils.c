@@ -237,3 +237,15 @@ char is_alpha(int c) {
     return (c >= 'a' && c <= 'z') ||
            (c >= 'A' && c <= 'Z');
 }
+
+char is_underscore(int c) {
+    return c == '_';
+}
+
+char is_opening_curly(int c) {
+    return c == '{';
+}
+
+char is_closing_curly(int c) {
+    return c == '}';
+}

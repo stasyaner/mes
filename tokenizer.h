@@ -2,11 +2,10 @@ enum token_type {
     string_token,
     number_token,
     semicolon_token,
-    relational_token,
-    jsx_opening_token,
-    jsx_closing_token,
-    jsx_self_closing_token,
-    jsx_text_token
+    opening_angle_token,
+    closing_angle_token,
+    identifier_token,
+    slash_token
 };
 
 typedef struct {

@@ -1,11 +1,4 @@
-125;
-"asd";
-1 > 5 > 7;
-2 > 4;
-3 < 6;
-9 > 2;
-3 < 7;
-5 < 3 < 1;
+5 < 3 < 7;
 <img />;
-882;
-<div>asd777</div>;
+"asdas";
+<p>hello world of paragraph</p>;
