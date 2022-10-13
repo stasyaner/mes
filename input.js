@@ -20,4 +20,7 @@ z < 2;
 1 > g;
 8>zxc;
 <></>;
-<a></a>;
+<div>
+    {true && abwdg}
+    <p>nested text</p>
+</div>;

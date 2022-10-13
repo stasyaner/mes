@@ -5,8 +5,8 @@
 #include "parser.h"
 #include "tokenizer.h"
 
-#define LIST_SIZE 255
-#define JSX_CONTENT_LENGTH 255
+#define MAX_LIST_SIZE 255
+#define JSX_MAX_TEXT_LENGTH 255
 #define read_token_and_lookahead(tt)\
         read_token_and_lookahead_va(1, tt);
 #define read_token_and_lookahead2(tt1, tt2)\
@@ -26,9 +26,9 @@ static Node *literal();
 static Node *primary_expression();
 static Node *relational_expression();
 /* static Node *binary_expression_wrapper(); */
-static Node *jsx_expression();
-static Node *jsx_opening_element();
-static Node *jsx_content();
+static Node *jsx_expression(char is_nested);
+static Node *jsx_opening_element(char is_nested);
+static Node *jsx_text();
 static Node *jsx_closing_element();
 
 static Token *lookahead_token = NULL;
@@ -53,10 +53,14 @@ static Node *file() {
 static Node *statement_list() {
     Node *result;
     Node **list;
-    int i = 0;
+    int i;
 
-    list = malloc(sizeof(Node) * LIST_SIZE);
-    for(i = 0; lookahead_token && i < LIST_SIZE; i++) {
+    list = malloc(sizeof(Node) * MAX_LIST_SIZE);
+    for(i = 0; lookahead_token; i++) {
+        if(i == (MAX_LIST_SIZE - 1)) {
+            fprintf(stderr, "Too many statements. Max is %d.\n", MAX_LIST_SIZE);
+            exit(1);
+        }
         list[i] = statement();
     }
     list[i + 1] = NULL;
@@ -91,7 +95,7 @@ static Node *expression() {
             return relational_expression();
         default:
         case opening_angle_token:
-            return jsx_expression();
+            return jsx_expression(0);
     }
 }
 
@@ -144,15 +148,42 @@ static Node *relational_expression() {
     return left;
 } */
 
-static Node *jsx_expression() {
+static Node *jsx_expression(char is_nested) {
     Node *result;
-    Node *opening_element = jsx_opening_element();
-    Node *content = NULL;
+    Node *opening_element = jsx_opening_element(is_nested);
+    Node **children = NULL;
     Node *closing_element = NULL;
+    int i;
 
     if (!opening_element->is_self_closing) {
-        if(lookahead_token->type != opening_angle_token) {
-            content = jsx_content();
+        for(i = 0;; i++) {
+            if(i == (MAX_LIST_SIZE - 1)) {
+                fprintf(
+                    stderr,
+                    "Too many jsx children. Max is %d.\n",
+                    MAX_LIST_SIZE
+                );
+                exit(1);
+            }
+            if(lookahead_token->type == opening_angle_token) {
+                lookahead();
+                if(lookahead_token->type == slash_token) {
+                    break;
+                } else {
+                    if(!children) {
+                        children = malloc(sizeof(Node) * MAX_LIST_SIZE);
+                    }
+                    children[i] = jsx_expression(1);
+                }
+            } else {
+                if(!children) {
+                    children = malloc(sizeof(Node) * MAX_LIST_SIZE);
+                }
+                children[i] = jsx_text();
+            }
+        }
+        if(children) {
+            children[i + 1] = NULL;
         }
         closing_element = jsx_closing_element();
     }
@@ -160,18 +191,20 @@ static Node *jsx_expression() {
     result = malloc(sizeof(Node));
     result->type = jsx_expression_node;
     result->opening_element = opening_element;
-    result->child = content;
+    result->children = children;
     result->closing_element = closing_element;
 
     return result;
 }
 
-static Node *jsx_opening_element() {
+static Node *jsx_opening_element(char is_nested) {
     char is_self_closing = 0;
     Node *result;
     Node *id = NULL;
 
-    read_token_and_lookahead(opening_angle_token);
+    if(!is_nested) {
+        read_token_and_lookahead(opening_angle_token);
+    }
     if(lookahead_token->type == identifier_token) {
         id = identifier();
     }
@@ -189,24 +222,24 @@ static Node *jsx_opening_element() {
     return result;
 }
 
-static Node *jsx_content() {
+static Node *jsx_text() {
     Node *result;
     char *p;
 
     result = malloc(sizeof(Node));
     result->type = jsx_content_node;
-    result->value = malloc(JSX_CONTENT_LENGTH);
+    result->value = malloc(JSX_MAX_TEXT_LENGTH);
     p = result->value;
 
     while(lookahead_token->type != opening_angle_token) {
         int l = strlen(lookahead_token->value);
         int l_total = result->value - p;
 
-        if(l_total >= (JSX_CONTENT_LENGTH - 1)) {
+        if(l_total >= (JSX_MAX_TEXT_LENGTH - 1)) {
             fprintf(
                 stderr,
                 "JSX text is too long. Max length is %d.\n",
-                JSX_CONTENT_LENGTH
+                JSX_MAX_TEXT_LENGTH
             );
             exit(1);
         }
@@ -227,7 +260,6 @@ static Node *jsx_closing_element() {
     Node *result;
     Node *id = NULL;
 
-    read_token_and_lookahead(opening_angle_token);
     read_token_and_lookahead(slash_token);
     if(lookahead_token->type == identifier_token) {
         id = identifier();

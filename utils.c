@@ -6,8 +6,17 @@
 #define BUF_SIZE 255
 #define JSON_NULL_STRING "null"
 
-static void print_node(const Node *node, int nesting_level, char put_trailing_comma);
-static void print_node_list(const Node **list, int nesting_level);
+static void print_node(
+    const Node *node,
+    int nesting_level,
+    char put_trailing_comma,
+    char indent_opening_curly
+);
+static void print_node_list(
+    const Node **list,
+    int nesting_level,
+    char put_trailing_comma
+);
 
 /* char *get_string_type_from_enum(enum node_type type) {
     switch(type) {
@@ -48,7 +57,8 @@ static char *get_tabs(int nesting_level) {
 static void print_node(
     const Node *node,
     int nesting_level,
-    char put_trailing_comma
+    char put_trailing_comma,
+    char indent_opening_curly
 ) {
     char *tabs = get_tabs(nesting_level);
 
@@ -66,7 +76,7 @@ static void print_node(
         case file_node:
             printf("%s\"type\": \"File\",\n", tabs);
             printf("%s\"content\":", tabs);
-            print_node(node->child, nesting_level, 1);
+            print_node(node->child, nesting_level, 1, 0);
             break;
         case numeric_literal_node:
             printf(" {\n");
@@ -102,7 +112,7 @@ static void print_node(
             printf("%s{\n", tabs);
             printf("\t%s\"type\": \"ExpressionStatement\",\n", tabs);
             printf("\t%s\"value\":", tabs);
-            print_node(node->child, nesting_level + 1, 0);
+            print_node(node->child, nesting_level + 1, 0, 0);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -110,17 +120,15 @@ static void print_node(
             }
             break;
         case statement_list_node:
-            printf(" [\n");
-            print_node_list((const Node **)node->children, nesting_level + 1);
-            printf("%s]\n", tabs);
+            print_node_list((const Node **)node->children, nesting_level, 0);
             break;
         case binary_expression_node:
             printf(" {\n");
             printf("\t%s\"type\": \"BinaryExpression\",\n", tabs);
             printf("\t%s\"left\":", tabs);
-            print_node(node->left, nesting_level + 1, 1);
+            print_node(node->left, nesting_level + 1, 1, 0);
             printf("\t%s\"right\":", tabs);
-            print_node(node->right, nesting_level + 1, 1);
+            print_node(node->right, nesting_level + 1, 1, 0);
             printf("\t%s\"operator\": \"%s\"\n", tabs, node->operator);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
@@ -129,14 +137,22 @@ static void print_node(
             }
             break;
         case jsx_expression_node:
-            printf(" {\n");
+            if(indent_opening_curly) {
+                printf("%s{\n", tabs);
+            } else {
+                printf(" {\n");
+            }
             printf("\t%s\"type\": \"JSXExpression\",\n", tabs);
             printf("\t%s\"openingElement\":", tabs);
-            print_node(node->opening_element, nesting_level + 1, 1);
+            print_node(node->opening_element, nesting_level + 1, 1, 0);
             printf("\t%s\"value\":", tabs);
-            print_node(node->child, nesting_level + 1, 1);
+            print_node_list(
+                (const Node **)node->children,
+                nesting_level + 1,
+                1
+            );
             printf("\t%s\"closingElement\":", tabs);
-            print_node(node->closing_element, nesting_level + 1, 0);
+            print_node(node->closing_element, nesting_level + 1, 0, 0);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -149,7 +165,7 @@ static void print_node(
             printf("\t%s\"isSelfClosing\": ", tabs);
             printf("%s,\n", node->is_self_closing ? "true" : "false");
             printf("\t%s\"value\":", tabs);
-            print_node(node->child, nesting_level + 1, 0);
+            print_node(node->child, nesting_level + 1, 0, 0);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -157,7 +173,7 @@ static void print_node(
             }
             break;
         case jsx_content_node:
-            printf(" {\n");
+            printf("%s{\n", tabs);
             printf("\t%s\"type\": \"JSXContent\",\n", tabs);
             printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
@@ -170,7 +186,7 @@ static void print_node(
             printf(" {\n");
             printf("\t%s\"type\": \"JSXClosingElement\",\n", tabs);
             printf("\t%s\"value\":", tabs);
-            print_node(node->child, nesting_level + 1, 0);
+            print_node(node->child, nesting_level + 1, 0, 0);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -186,21 +202,39 @@ static void print_node(
     free(tabs);
 }
 
-static void print_node_list(const Node **list, int nesting_level) {
-    char is_last = 1;
+static void print_node_list(
+    const Node **list,
+    int nesting_level,
+    char put_trailing_comma
+) {
+    char *tabs = get_tabs(nesting_level);
     const Node **p;
 
+    printf(" [");
+
+    if(!list) {
+        printf("],\n");
+        return;
+    }
+
+    printf("\n");
     for(p = list; *p; p++) {
+        char is_last = 1;
         if(!*(p + 1)) {
             is_last = 0;
         }
-        print_node(*p, nesting_level, is_last);
+        print_node(*p, nesting_level + 1, is_last, 1);
+    }
+    if(put_trailing_comma) {
+        printf("%s],\n", tabs);
+    } else {
+        printf("%s]\n", tabs);
     }
 }
 
 void print_ast(const Node *ast) {
     printf("{\n");
-    print_node(ast, 1, 1);
+    print_node(ast, 1, 1, 0);
     printf("}\n");
 }
 
