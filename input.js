@@ -20,7 +20,7 @@ z < 2;
 1 > g;
 8>zxc;
 <></>;
-<div>
+<div className="myclass" textonly="true">
     {true && abwdg}
     <p>nested text</p>
 </div>;

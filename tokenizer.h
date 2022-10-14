@@ -9,7 +9,8 @@ enum token_type {
     opening_curly_token,
     closing_curly_token,
     ampersand_token,
-    pipe_token
+    pipe_token,
+    equality_token
 };
 
 typedef struct {

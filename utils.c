@@ -165,7 +165,30 @@ static void print_node(
             printf("\t%s\"isSelfClosing\": ", tabs);
             printf("%s,\n", node->is_self_closing ? "true" : "false");
             printf("\t%s\"value\":", tabs);
-            print_node(node->child, nesting_level + 1, 0, 0);
+            print_node(node->child, nesting_level + 1, 1, 0);
+            printf("\t%s\"attributes\":", tabs);
+            print_node_list(
+                (const Node **)node->children,
+                nesting_level + 1,
+                0
+            );
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
+            break;
+        case jsx_attribute_node:
+            if(indent_opening_curly) {
+                printf("%s{\n", tabs);
+            } else {
+                printf(" {\n");
+            }
+            printf("\t%s\"type\": \"JSXAttribute\",\n", tabs);
+            printf("\t%s\"name\":", tabs);
+            print_node(node->left, nesting_level + 1, 1, 0);
+            printf("\t%s\"value\":", tabs);
+            print_node(node->right, nesting_level + 1, 0, 0);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -194,7 +217,11 @@ static void print_node(
             }
             break;
         default:
-            printf(" {\n");
+            if(indent_opening_curly) {
+                printf("%s{\n", tabs);
+            } else {
+                printf(" {\n");
+            }
             printf("\t%s\"type\": \"Unknown\"\n", tabs);
             printf("%s}\n", tabs);
     }
@@ -209,17 +236,22 @@ static void print_node_list(
 ) {
     char *tabs = get_tabs(nesting_level);
     const Node **p;
+    char is_last = 1;
 
     printf(" [");
 
     if(!list) {
-        printf("],\n");
+        if(put_trailing_comma) {
+            printf("],\n");
+        } else {
+            printf("]\n");
+        }
+
         return;
     }
 
     printf("\n");
     for(p = list; *p; p++) {
-        char is_last = 1;
         if(!*(p + 1)) {
             is_last = 0;
         }
@@ -301,4 +333,8 @@ char is_pipe(int c) {
 
 char is_ampersand(int c) {
     return c == '&';
+}
+
+char is_equality(int c) {
+    return c == '=';
 }

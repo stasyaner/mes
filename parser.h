@@ -8,6 +8,7 @@ enum node_type {
     binary_expression_node,
     jsx_expression_node,
     jsx_opening_element_node,
+    jsx_attribute_node,
     jsx_content_node,
     jsx_closing_element_node
 };

@@ -28,6 +28,7 @@ static Node *relational_expression();
 /* static Node *binary_expression_wrapper(); */
 static Node *jsx_expression(char is_nested);
 static Node *jsx_opening_element(char is_nested);
+static Node *jsx_attribute();
 static Node *jsx_text();
 static Node *jsx_closing_element();
 
@@ -201,6 +202,8 @@ static Node *jsx_opening_element(char is_nested) {
     char is_self_closing = 0;
     Node *result;
     Node *id = NULL;
+    Node **attributes = NULL;
+    int i;
 
     if(!is_nested) {
         read_token_and_lookahead(opening_angle_token);
@@ -208,7 +211,21 @@ static Node *jsx_opening_element(char is_nested) {
     if(lookahead_token->type == identifier_token) {
         id = identifier();
     }
-    if(lookahead_token->type == slash_token) {
+    if(lookahead_token->type == identifier_token) {
+        attributes = malloc(sizeof(Node) * MAX_LIST_SIZE);
+        for(i = 0; lookahead_token->type == identifier_token; i++) {
+            if(i == (MAX_LIST_SIZE - 1)) {
+                fprintf(
+                    stderr,
+                    "Too many jsx children. Max is %d.\n",
+                    MAX_LIST_SIZE
+                );
+                exit(1);
+            }
+            attributes[i] = jsx_attribute();
+        }
+        attributes[i + 1] = NULL;
+    } else if(lookahead_token->type == slash_token) {
         is_self_closing = 1;
         lookahead();
     }
@@ -217,7 +234,24 @@ static Node *jsx_opening_element(char is_nested) {
     result = malloc(sizeof(Node));
     result->type = jsx_opening_element_node;
     result->child = id;
+    result->children = attributes;
     result->is_self_closing = is_self_closing;
+
+    return result;
+}
+
+static Node *jsx_attribute() {
+    Node *result;
+    Node *id = identifier();
+    Node *value;
+
+    read_token_and_lookahead(equality_token);
+    value = string_literal();
+
+    result = malloc(sizeof(Node));
+    result->type = jsx_attribute_node;
+    result->left = id;
+    result->right = value;
 
     return result;
 }

@@ -111,6 +111,10 @@ Token *get_next_token() {
         token->type = ampersand_token;
         token->value[0] = c;
         token->value[1] = '\0';
+    } else if(is_equality(c)) {
+        token->type = equality_token;
+        token->value[0] = c;
+        token->value[1] = '\0';
     } else if(is_alpha(c)) {
         token->type = identifier_token;
         token->value[0] = c;
