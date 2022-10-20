@@ -26,9 +26,10 @@ static Node *literal();
 static Node *primary_expression();
 static Node *relational_expression();
 /* static Node *binary_expression_wrapper(); */
-static Node *jsx_expression(char is_nested);
+static Node *jsx_element(char is_nested);
 static Node *jsx_opening_element(char is_nested);
 static Node *jsx_attribute();
+static Node *jsx_expression();
 static Node *jsx_text();
 static Node *jsx_closing_element();
 
@@ -96,7 +97,7 @@ static Node *expression() {
             return relational_expression();
         default:
         case opening_angle_token:
-            return jsx_expression(0);
+            return jsx_element(0);
     }
 }
 
@@ -149,7 +150,7 @@ static Node *relational_expression() {
     return left;
 } */
 
-static Node *jsx_expression(char is_nested) {
+static Node *jsx_element(char is_nested) {
     Node *result;
     Node *opening_element = jsx_opening_element(is_nested);
     Node **children = NULL;
@@ -174,8 +175,13 @@ static Node *jsx_expression(char is_nested) {
                     if(!children) {
                         children = malloc(sizeof(Node) * MAX_LIST_SIZE);
                     }
-                    children[i] = jsx_expression(1);
+                    children[i] = jsx_element(1);
                 }
+            } else if(lookahead_token->type == opening_curly_token) {
+                if(!children) {
+                    children = malloc(sizeof(Node) * MAX_LIST_SIZE);
+                }
+                children[i] = jsx_expression();
             } else {
                 if(!children) {
                     children = malloc(sizeof(Node) * MAX_LIST_SIZE);
@@ -190,7 +196,7 @@ static Node *jsx_expression(char is_nested) {
     }
 
     result = malloc(sizeof(Node));
-    result->type = jsx_expression_node;
+    result->type = jsx_element_node;
     result->opening_element = opening_element;
     result->children = children;
     result->closing_element = closing_element;
@@ -246,7 +252,11 @@ static Node *jsx_attribute() {
     Node *value;
 
     read_token_and_lookahead(equality_token);
-    value = string_literal();
+    if(lookahead_token->type == opening_curly_token) {
+        value = jsx_expression();
+    } else {
+        value = string_literal();
+    }
 
     result = malloc(sizeof(Node));
     result->type = jsx_attribute_node;
@@ -256,12 +266,27 @@ static Node *jsx_attribute() {
     return result;
 }
 
+static Node *jsx_expression() {
+    Node *result;
+    Node *content;
+
+    read_token_and_lookahead(opening_curly_token);
+    content = primary_expression();
+    read_token_and_lookahead(closing_curly_token);
+
+    result = malloc(sizeof(Node));
+    result->type = jsx_expression_node;
+    result->child = content;
+
+    return result;
+}
+
 static Node *jsx_text() {
     Node *result;
     char *p;
 
     result = malloc(sizeof(Node));
-    result->type = jsx_content_node;
+    result->type = jsx_text_node;
     result->value = malloc(JSX_MAX_TEXT_LENGTH);
     p = result->value;
 

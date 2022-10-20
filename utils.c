@@ -136,13 +136,13 @@ static void print_node(
                 printf("%s}\n", tabs);
             }
             break;
-        case jsx_expression_node:
+        case jsx_element_node:
             if(indent_opening_curly) {
                 printf("%s{\n", tabs);
             } else {
                 printf(" {\n");
             }
-            printf("\t%s\"type\": \"JSXExpression\",\n", tabs);
+            printf("\t%s\"type\": \"JSXElement\",\n", tabs);
             printf("\t%s\"openingElement\":", tabs);
             print_node(node->opening_element, nesting_level + 1, 1, 0);
             printf("\t%s\"value\":", tabs);
@@ -195,9 +195,24 @@ static void print_node(
                 printf("%s}\n", tabs);
             }
             break;
-        case jsx_content_node:
+        case jsx_expression_node:
+            if(indent_opening_curly) {
+                printf("%s{\n", tabs);
+            } else {
+                printf(" {\n");
+            }
+            printf("\t%s\"type\": \"JSXExpression\",\n", tabs);
+            printf("\t%s\"value\":", tabs);
+            print_node(node->child, nesting_level + 1, 0, 0);
+            if(put_trailing_comma) {
+                printf("%s},\n", tabs);
+            } else {
+                printf("%s}\n", tabs);
+            }
+            break;
+        case jsx_text_node:
             printf("%s{\n", tabs);
-            printf("\t%s\"type\": \"JSXContent\",\n", tabs);
+            printf("\t%s\"type\": \"JSXText\",\n", tabs);
             printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);

@@ -20,7 +20,8 @@ z < 2;
 1 > g;
 8>zxc;
 <></>;
-<div className="myclass" textonly="true">
-    {true && abwdg}
+<div className="myclass" textonly="true" isDefault={isDefault}>
+    {content}
+    jsx text lets go
     <p>nested text</p>
 </div>;
