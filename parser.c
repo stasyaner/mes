@@ -26,7 +26,9 @@ static Node *literal();
 static Node *primary_expression();
 static Node *relational_expression();
 /* static Node *binary_expression_wrapper(); */
-static Node *jsx_element(char is_nested);
+static Node *jsx_element_base(char is_nested);
+static Node *jsx_element(void);
+static Node *jsx_element_nested();
 static Node *jsx_opening_element(char is_nested);
 static Node *jsx_attribute();
 static Node *jsx_expression();
@@ -97,7 +99,7 @@ static Node *expression() {
             return relational_expression();
         default:
         case opening_angle_token:
-            return jsx_element(0);
+            return jsx_element();
     }
 }
 
@@ -150,14 +152,15 @@ static Node *relational_expression() {
     return left;
 } */
 
-static Node *jsx_element(char is_nested) {
+static Node *jsx_element_base(char is_nested) {
     Node *result;
     Node *opening_element = jsx_opening_element(is_nested);
     Node **children = NULL;
     Node *closing_element = NULL;
+    Node *(*child_func)(void) = NULL;
     int i;
 
-    if (!opening_element->is_self_closing) {
+    if(!opening_element->is_self_closing) {
         for(i = 0;; i++) {
             if(i == (MAX_LIST_SIZE - 1)) {
                 fprintf(
@@ -167,27 +170,24 @@ static Node *jsx_element(char is_nested) {
                 );
                 exit(1);
             }
+
             if(lookahead_token->type == opening_angle_token) {
                 lookahead();
                 if(lookahead_token->type == slash_token) {
                     break;
                 } else {
-                    if(!children) {
-                        children = malloc(sizeof(Node) * MAX_LIST_SIZE);
-                    }
-                    children[i] = jsx_element(1);
+                    child_func = jsx_element_nested;
                 }
             } else if(lookahead_token->type == opening_curly_token) {
-                if(!children) {
-                    children = malloc(sizeof(Node) * MAX_LIST_SIZE);
-                }
-                children[i] = jsx_expression();
+                child_func = jsx_expression;
             } else {
-                if(!children) {
-                    children = malloc(sizeof(Node) * MAX_LIST_SIZE);
-                }
-                children[i] = jsx_text();
+                child_func = jsx_text;
             }
+
+            if(!children) {
+                children = malloc(sizeof(Node) * MAX_LIST_SIZE);
+            }
+            children[i] = child_func();
         }
         if(children) {
             children[i + 1] = NULL;
@@ -202,6 +202,14 @@ static Node *jsx_element(char is_nested) {
     result->closing_element = closing_element;
 
     return result;
+}
+
+static Node *jsx_element(void) {
+    return jsx_element_base(0);
+}
+
+static Node *jsx_element_nested() {
+    return jsx_element_base(1);
 }
 
 static Node *jsx_opening_element(char is_nested) {
