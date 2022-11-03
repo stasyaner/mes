@@ -203,7 +203,11 @@ static void print_node(
             }
             printf("\t%s\"type\": \"JSXExpression\",\n", tabs);
             printf("\t%s\"value\":", tabs);
-            print_node(node->child, nesting_level + 1, 0, 0);
+            print_node_list(
+                (const Node **)node->children,
+                nesting_level + 1,
+                0
+            );
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
             } else {
@@ -352,4 +356,8 @@ char is_ampersand(int c) {
 
 char is_equality(int c) {
     return c == '=';
+}
+
+char is_eof(int c) {
+    return c == EOF;
 }

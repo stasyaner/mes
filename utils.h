@@ -16,3 +16,4 @@ char is_closing_curly(int c);
 char is_pipe(int c);
 char is_ampersand(int c);
 char is_equality(int c);
+char is_eof(int c);
