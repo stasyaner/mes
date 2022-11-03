@@ -10,7 +10,10 @@ enum token_type {
     closing_curly_token,
     ampersand_token,
     pipe_token,
-    equality_token
+    equality_token,
+    space_token,
+    linebreak_token,
+    special_token
 };
 
 typedef struct {
@@ -19,4 +22,6 @@ typedef struct {
 } Token;
 
 char check_token_type(Token *token, enum token_type acceptable_token_type);
-Token *get_next_token();
+Token *get_next_token_base(char parse_space);
+#define get_next_token_w_space() get_next_token_base(1)
+#define get_next_token() get_next_token_base(0)

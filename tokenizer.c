@@ -17,7 +17,7 @@ static const Spec spec[] = {
     { is_number, handle_number }
 }; */
 
-Token *get_next_token() {
+Token *get_next_token_base(char parse_space) {
     Token *token;
     char c;
     int i;
@@ -128,7 +128,7 @@ Token *get_next_token() {
                 exit(1);
             }
             c = getchar();
-            if(is_alpha(c) || is_underscore(c)) {
+            if(is_alpha(c) || is_underscore(c) || is_number(c)) {
                 token->value[i] = c;
             } else {
                 c_cached = c;
@@ -136,12 +136,34 @@ Token *get_next_token() {
             }
         }
         token->value[i] = '\0';
-    } else if(is_space(c) || is_linebreak(c)) {
+    } else if(is_space(c)) {
+        if(parse_space) {
+            token->type = space_token;
+            token->value[0] = c;
+            token->value[1] = '\0';
+        } else {
+            free(token->value);
+            free(token);
+            return get_next_token_base(parse_space);
+        }
+    } else if(is_linebreak(c)) {
+        if(parse_space) {
+            token->type = linebreak_token;
+            token->value[0] = c;
+            token->value[1] = '\0';
+        } else {
+            free(token->value);
+            free(token);
+            return get_next_token_base(parse_space);
+        }
+    } else if(is_eof(c)) {
         free(token->value);
         free(token);
-        return get_next_token();
-    } else {
         return NULL;
+    } else {
+        token->type = special_token;
+        token->value[0] = c;
+        token->value[1] = '\0';
     }
 
     return token;
