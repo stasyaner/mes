@@ -141,21 +141,24 @@ Token *get_next_token_base(char parse_space) {
             token->type = space_token;
             token->value[0] = c;
             token->value[1] = '\0';
+            for(;;) {
+                c = getchar();
+                if(is_space(c)) {
+                    continue;
+                } else {
+                    c_cached = c;
+                    break;
+                }
+            }
         } else {
             free(token->value);
             free(token);
             return get_next_token_base(parse_space);
         }
     } else if(is_linebreak(c)) {
-        if(parse_space) {
-            token->type = linebreak_token;
-            token->value[0] = c;
-            token->value[1] = '\0';
-        } else {
-            free(token->value);
-            free(token);
-            return get_next_token_base(parse_space);
-        }
+        free(token->value);
+        free(token);
+        return get_next_token_base(parse_space);
     } else if(is_eof(c)) {
         free(token->value);
         free(token);

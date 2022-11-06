@@ -196,7 +196,10 @@ static Node *jsx_opening_element(char is_nested) {
         is_self_closing = 1;
         lookahead();
     }
-    if(!read_token_and_lookahead(closing_angle_token)) {
+
+    if(read_token_and_lookahead(slash_token)) {
+        is_self_closing = 1;
+    } else if(!read_token_and_lookahead(closing_angle_token)) {
         return NULL;
     }
 
@@ -277,6 +280,7 @@ static Node *jsx_expression() {
 static Node *jsx_text() {
     Node *result;
     char *p;
+    int skip_closing_curly_count = 0;
 
     result = malloc(sizeof(Node));
     result->type = jsx_text_node;
@@ -285,13 +289,21 @@ static Node *jsx_text() {
 
     while(
         lookahead_token &&
-        lookahead_token->type != opening_angle_token &&
-        lookahead_token->type != opening_curly_token &&
-        lookahead_token->type != closing_curly_token &&
-        lookahead_token->type != linebreak_token
+        lookahead_token->type != opening_angle_token
     ) {
         int l = strlen(lookahead_token->value);
         int l_total = p - result->value;
+
+        if(lookahead_token->type == opening_curly_token) {
+            skip_closing_curly_count++;
+        }
+        if(lookahead_token->type == closing_curly_token) {
+            if(skip_closing_curly_count) {
+                skip_closing_curly_count--;
+            } else {
+                break;
+            }
+        }
 
         if(lookahead_token->type == string_token) {
             l_total += 2;
@@ -319,10 +331,6 @@ static Node *jsx_text() {
         lookahead_w_space_parsing();
     }
     *p = '\0';
-
-    if(lookahead_token->type == linebreak_token) {
-        lookahead();
-    }
 
     return result;
 }
