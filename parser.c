@@ -12,15 +12,20 @@
 #define read_token_and_lookahead2(tt1, tt2)\
         read_token_and_lookahead_va(2, tt1, tt2)
 
+union jsx_child_function {
+    Node *(*jsx_element_nested)(long start_position);
+    Node *(*other_one_argument_function)(void);
+};
+
 static Token *read_token_and_lookahead_va(int n, ...);
 static Node *file();
 static Node *string_literal();
 static Node *statement_list();
 static Node *identifier();
-static Node *jsx_element_base(char is_nested);
+static Node *jsx_element_base(char is_nested, long start_position);
 static Node *jsx_element(void);
 static Node *jsx_element_nested();
-static Node *jsx_opening_element(char is_nested);
+static Node *jsx_opening_element(char is_nested, long start_position);
 static Node *jsx_attribute();
 static Node *jsx_expression();
 static Node *jsx_text();
@@ -41,9 +46,13 @@ Node *parse() {
 
 static Node *file() {
     Node *result;
+    Node *child = statement_list();
+
     result = malloc(sizeof(Node));
     result->type = file_node;
-    result->child = statement_list();
+    result->child = child;
+    result->start = child->start;
+    result->end = child->end;
 
     return result;
 }
@@ -53,7 +62,7 @@ static Node *statement_list() {
     Node **list = NULL;
     int i;
 
-    for(i = 0; lookahead_token;) {
+    for(i = 0;; i++) {
         if(i == (MAX_LIST_SIZE - 1)) {
             fprintf(stderr, "Too many statements. Max is %d.\n", MAX_LIST_SIZE);
             exit(1);
@@ -62,6 +71,7 @@ static Node *statement_list() {
             break;
         }
         if(lookahead_token->type != opening_angle_token) {
+            i--;
             free(lookahead_token->value);
             free(lookahead_token);
             lookahead();
@@ -69,6 +79,7 @@ static Node *statement_list() {
         }
         st = jsx_element();
         if(!st) {
+            i--;
             /* TODO: free jsx_element */
             lookahead();
             continue;
@@ -77,26 +88,28 @@ static Node *statement_list() {
             list = malloc(sizeof(Node) * MAX_LIST_SIZE);
         }
         list[i] = st;
-        i++;
     }
     if(list) {
-        list[i + 1] = NULL;
+        list[i] = NULL;
     }
 
     result = malloc(sizeof(Node));
     result->type = statement_list_node;
     result->children = list;
+    result->start = list[0]->start;
+    result->end = list[i - 1]->end;
 
     return result;
 }
 
-static Node *jsx_element_base(char is_nested) {
+static Node *jsx_element_base(char is_nested, long start_position) {
     Node *result;
-    Node *opening_element = jsx_opening_element(is_nested);
+    Node *opening_element = jsx_opening_element(is_nested, start_position);
     Node **children = NULL;
     Node *closing_element = NULL;
     Node *child;
-    Node *(*child_func)(void) = NULL;
+    union jsx_child_function child_func;
+    long nested_start_position = -1;
     int i;
 
     if(!opening_element) {
@@ -119,18 +132,25 @@ static Node *jsx_element_base(char is_nested) {
             }
 
             if(lookahead_token->type == opening_angle_token) {
+                nested_start_position = lookahead_token->start;
                 lookahead();
                 if(lookahead_token->type == slash_token) {
                     break;
                 } else {
-                    child_func = jsx_element_nested;
+                    child_func.jsx_element_nested = jsx_element_nested;
                 }
             } else if(lookahead_token->type == opening_curly_token) {
-                child_func = jsx_expression;
+                child_func.other_one_argument_function = jsx_expression;
             } else {
-                child_func = jsx_text;
+                child_func.other_one_argument_function = jsx_text;
             }
-            child = child_func();
+
+            if(nested_start_position > 0) {
+                child = child_func.jsx_element_nested(nested_start_position);
+            } else {
+                child = child_func.other_one_argument_function();
+            }
+
             if(!child) {
                 return NULL;
             }
@@ -140,7 +160,7 @@ static Node *jsx_element_base(char is_nested) {
             children[i] = child;
         }
         if(children) {
-            children[i + 1] = NULL;
+            children[i] = NULL;
         }
         closing_element = jsx_closing_element();
     }
@@ -150,27 +170,33 @@ static Node *jsx_element_base(char is_nested) {
     result->opening_element = opening_element;
     result->children = children;
     result->closing_element = closing_element;
+    result->start = is_nested ? start_position : opening_element->start;
+    result->end = opening_element->is_self_closing ?
+        opening_element->end
+        : closing_element->end;
 
     return result;
 }
 
 static Node *jsx_element(void) {
-    return jsx_element_base(0);
+    return jsx_element_base(0, -1);
 }
 
-static Node *jsx_element_nested() {
-    return jsx_element_base(1);
+static Node *jsx_element_nested(long start_position) {
+    return jsx_element_base(1, start_position);
 }
 
-static Node *jsx_opening_element(char is_nested) {
+static Node *jsx_opening_element(char is_nested, long start_position) {
     char is_self_closing = 0;
     Node *result;
     Node *id = NULL;
     Node **attributes = NULL;
+    Token *start_token = NULL;
+    Token *end_token = NULL;
     int i;
 
     if(!is_nested) {
-        read_token_and_lookahead(opening_angle_token);
+        start_token = read_token_and_lookahead(opening_angle_token);
     }
     if(lookahead_token->type == identifier_token) {
         id = identifier();
@@ -199,7 +225,10 @@ static Node *jsx_opening_element(char is_nested) {
 
     if(read_token_and_lookahead(slash_token)) {
         is_self_closing = 1;
-    } else if(!read_token_and_lookahead(closing_angle_token)) {
+    }
+
+    end_token = read_token_and_lookahead(closing_angle_token);
+    if(!end_token) {
         return NULL;
     }
 
@@ -208,6 +237,8 @@ static Node *jsx_opening_element(char is_nested) {
     result->child = id;
     result->children = attributes;
     result->is_self_closing = is_self_closing;
+    result->start = is_nested ? start_position : start_token->start;
+    result->end = end_token->end;
 
     return result;
 }
@@ -228,6 +259,8 @@ static Node *jsx_attribute() {
     result->type = jsx_attribute_node;
     result->left = id;
     result->right = value;
+    result->start = id->start;
+    result->end = value->end;
 
     return result;
 }
@@ -235,10 +268,13 @@ static Node *jsx_attribute() {
 static Node *jsx_expression() {
     Node *result;
     Node **children = NULL;
-    Node *(*child_func)(void) = NULL;
+    Token *start_token = NULL;
+    Token *end_token = NULL;
+    union jsx_child_function child_func;
+    long start_position = -1;
     int i;
 
-    read_token_and_lookahead(opening_curly_token);
+    start_token = read_token_and_lookahead(opening_curly_token);
 
     for(i = 0;; i++) {
         if(i == (MAX_LIST_SIZE - 1)) {
@@ -251,28 +287,35 @@ static Node *jsx_expression() {
         }
 
         if(lookahead_token->type == opening_angle_token) {
+            start_position = lookahead_token->start;
             lookahead();
-            child_func = jsx_element_nested;
+            child_func.jsx_element_nested = jsx_element_nested;
         } else if(lookahead_token->type == closing_curly_token) {
             break;
         } else {
-            child_func = jsx_text;
+            child_func.other_one_argument_function = jsx_text;
         }
 
         if(!children) {
             children = malloc(sizeof(Node) * MAX_LIST_SIZE);
         }
-        children[i] = child_func();
+        if(start_position > 0) {
+            children[i] = child_func.jsx_element_nested(start_position);
+        } else {
+            children[i] = child_func.other_one_argument_function();
+        }
     }
     if(children) {
-        children[i + 1] = NULL;
+        children[i] = NULL;
     }
 
-    read_token_and_lookahead(closing_curly_token);
+    end_token = read_token_and_lookahead(closing_curly_token);
 
     result = malloc(sizeof(Node));
     result->type = jsx_expression_node;
     result->children = children;
+    result->start = start_token->start;
+    result->end = end_token->end;
 
     return result;
 }
@@ -286,6 +329,10 @@ static Node *jsx_text() {
     result->type = jsx_text_node;
     result->value = malloc(JSX_MAX_TEXT_LENGTH);
     p = result->value;
+
+    if(lookahead_token) {
+        result->start = lookahead_token->start;
+    }
 
     while(
         lookahead_token &&
@@ -326,10 +373,13 @@ static Node *jsx_text() {
             *p = '\'';
             p++;
         }
+
+        result->end = lookahead_token->end;
         free(lookahead_token->value);
         free(lookahead_token);
         lookahead_w_space_parsing();
     }
+
     *p = '\0';
 
     return result;
@@ -338,16 +388,20 @@ static Node *jsx_text() {
 static Node *jsx_closing_element() {
     Node *result;
     Node *id = NULL;
+    Token *start_token = NULL;
+    Token *end_token = NULL;
 
-    read_token_and_lookahead(slash_token);
+    start_token = read_token_and_lookahead(slash_token);
     if(lookahead_token->type == identifier_token) {
         id = identifier();
     }
-    read_token_and_lookahead(closing_angle_token);
+    end_token = read_token_and_lookahead(closing_angle_token);
 
     result = malloc(sizeof(Node));
     result->type = jsx_closing_element_node;
     result->child = id;
+    result->start = start_token->start;
+    result->end = end_token->end;
 
     return result;
 }
@@ -363,6 +417,8 @@ static Node *identifier() {
     result = malloc(sizeof(Node));
     result->type = identifier_node;
     result->value = token->value;
+    result->start = token->start;
+    result->end = token->end;
 
     return result;
 }
@@ -375,6 +431,8 @@ static Node *string_literal() {
     result->type = string_literal_node;
     token = read_token_and_lookahead(string_token);
     result->value = token->value;
+    result->start = token->start;
+    result->end = token->end;
 
     return result;
 }

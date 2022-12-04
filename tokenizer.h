@@ -19,6 +19,8 @@ enum token_type {
 typedef struct {
     enum token_type type;
     char *value;
+    long start;
+    long end;
 } Token;
 
 char check_token_type(Token *token, enum token_type acceptable_token_type);

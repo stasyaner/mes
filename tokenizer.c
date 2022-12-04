@@ -7,6 +7,7 @@
 #define BUF_SIZE 255
 
 static int c_cached = '\0';
+static long last_char_index = 0;
 
 /* typedef struct Specification {
     char (*qualification_func)(int);
@@ -31,6 +32,8 @@ Token *get_next_token_base(char parse_space) {
 
     token = malloc(sizeof(Token));
     token->value = malloc(BUF_SIZE);
+    token->start = last_char_index;
+
     if(is_number(c)) {
         token->type = number_token;
         token->value[0] = c;
@@ -51,6 +54,8 @@ Token *get_next_token_base(char parse_space) {
             }
         }
         token->value[i] = '\0';
+        token->end = token->start + i;
+        last_char_index = token->end;
         c_cached = c;
     } else if(is_string_enclosure(c)) {
         char c_stored = c;
@@ -72,6 +77,9 @@ Token *get_next_token_base(char parse_space) {
             }
         }
         token->value[i] = '\0';
+        /* i+2 = +1 as we started from 0 and +1 for closing quote */
+        token->end = token->start + i + 2;
+        last_char_index = token->end;
         if(c != c_stored) {
             fprintf(
                 stderr,
@@ -83,38 +91,56 @@ Token *get_next_token_base(char parse_space) {
         token->type = semicolon_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     } else if(is_opening_angle_bracket(c)) {
         token->type = opening_angle_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     } else if(is_closing_angle_bracket(c)) {
         token->type = closing_angle_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     } else if(is_slash(c)) {
         token->type = slash_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     } else if(is_opening_curly(c)) {
         token->type = opening_curly_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     } else if(is_closing_curly(c)) {
         token->type = closing_curly_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     } else if(is_pipe(c)) {
         token->type = pipe_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     } else if(is_ampersand(c)) {
         token->type = ampersand_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     } else if(is_equality(c)) {
         token->type = equality_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     } else if(is_alpha(c)) {
         token->type = identifier_token;
         token->value[0] = c;
@@ -136,12 +162,14 @@ Token *get_next_token_base(char parse_space) {
             }
         }
         token->value[i] = '\0';
+        token->end = token->start + i;
+        last_char_index = token->end;
     } else if(is_space(c)) {
         if(parse_space) {
             token->type = space_token;
             token->value[0] = c;
             token->value[1] = '\0';
-            for(;;) {
+            for(i = 1;; i++) {
                 c = getchar();
                 if(is_space(c)) {
                     continue;
@@ -150,23 +178,30 @@ Token *get_next_token_base(char parse_space) {
                     break;
                 }
             }
+            token->end = token->start + i;
+            last_char_index = token->end;
         } else {
             free(token->value);
             free(token);
+            last_char_index++;
             return get_next_token_base(parse_space);
         }
     } else if(is_linebreak(c)) {
         free(token->value);
         free(token);
+        last_char_index++;
         return get_next_token_base(parse_space);
     } else if(is_eof(c)) {
         free(token->value);
         free(token);
+        last_char_index++;
         return NULL;
     } else {
         token->type = special_token;
         token->value[0] = c;
         token->value[1] = '\0';
+        token->end = token->start + 1;
+        last_char_index = token->end;
     }
 
     return token;

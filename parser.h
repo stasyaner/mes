@@ -16,6 +16,8 @@ enum node_type {
 
 typedef struct ASTNode {
     enum node_type type;
+    long start;
+    long end;
     char *value;
     char *operator;
     char is_self_closing;

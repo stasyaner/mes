@@ -75,12 +75,16 @@ static void print_node(
     switch(node->type) {
         case file_node:
             printf("%s\"type\": \"File\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("%s\"content\":", tabs);
             print_node(node->child, nesting_level, 1, 0);
             break;
         case numeric_literal_node:
             printf(" {\n");
             printf("\t%s\"type\": \"NumericLiteral\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("\t%s\"value\": %s\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
@@ -91,6 +95,8 @@ static void print_node(
         case string_literal_node:
             printf(" {\n");
             printf("\t%s\"type\": \"StringLiteral\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
@@ -101,6 +107,8 @@ static void print_node(
         case identifier_node:
             printf(" {\n");
             printf("\t%s\"type\": \"Identifier\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
@@ -143,6 +151,8 @@ static void print_node(
                 printf(" {\n");
             }
             printf("\t%s\"type\": \"JSXElement\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("\t%s\"openingElement\":", tabs);
             print_node(node->opening_element, nesting_level + 1, 1, 0);
             printf("\t%s\"value\":", tabs);
@@ -162,6 +172,8 @@ static void print_node(
         case jsx_opening_element_node:
             printf(" {\n");
             printf("\t%s\"type\": \"JSXOpeningElement\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("\t%s\"isSelfClosing\": ", tabs);
             printf("%s,\n", node->is_self_closing ? "true" : "false");
             printf("\t%s\"value\":", tabs);
@@ -185,6 +197,8 @@ static void print_node(
                 printf(" {\n");
             }
             printf("\t%s\"type\": \"JSXAttribute\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("\t%s\"name\":", tabs);
             print_node(node->left, nesting_level + 1, 1, 0);
             printf("\t%s\"value\":", tabs);
@@ -202,6 +216,8 @@ static void print_node(
                 printf(" {\n");
             }
             printf("\t%s\"type\": \"JSXExpression\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("\t%s\"value\":", tabs);
             print_node_list(
                 (const Node **)node->children,
@@ -217,6 +233,8 @@ static void print_node(
         case jsx_text_node:
             printf("%s{\n", tabs);
             printf("\t%s\"type\": \"JSXText\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("\t%s\"value\": \"%s\"\n", tabs, node->value);
             if(put_trailing_comma) {
                 printf("%s},\n", tabs);
@@ -227,6 +245,8 @@ static void print_node(
         case jsx_closing_element_node:
             printf(" {\n");
             printf("\t%s\"type\": \"JSXClosingElement\",\n", tabs);
+            printf("\t%s\"start\": %ld,\n", tabs, node->start);
+            printf("\t%s\"end\": %ld,\n", tabs, node->end);
             printf("\t%s\"value\":", tabs);
             print_node(node->child, nesting_level + 1, 0, 0);
             if(put_trailing_comma) {
