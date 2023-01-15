@@ -75,8 +75,8 @@ static void print_node(
     switch(node->type) {
         case file_node:
             printf("%s\"type\": \"File\",\n", tabs);
-            printf("\t%s\"start\": %ld,\n", tabs, node->start);
-            printf("\t%s\"end\": %ld,\n", tabs, node->end);
+            printf("%s\"start\": %ld,\n", tabs, node->start);
+            printf("%s\"end\": %ld,\n", tabs, node->end);
             printf("%s\"content\":", tabs);
             print_node(node->child, nesting_level, 1, 0);
             break;
