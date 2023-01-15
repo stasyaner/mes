@@ -24,6 +24,7 @@ typedef struct {
 } Token;
 
 char check_token_type(Token *token, enum token_type acceptable_token_type);
+void tokenizer_init(char *init_input);
 Token *get_next_token_base(char parse_space);
 #define get_next_token_w_space() get_next_token_base(1)
 #define get_next_token() get_next_token_base(0)

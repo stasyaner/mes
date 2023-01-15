@@ -29,4 +29,4 @@ typedef struct ASTNode {
     struct ASTNode *closing_element;
 } Node;
 
-Node *parse();
+Node *parse(char *input);

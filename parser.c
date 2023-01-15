@@ -39,7 +39,8 @@ static void lookahead_w_space_parsing() {
     lookahead_token = get_next_token_w_space();
 }
 
-Node *parse() {
+Node *parse(char *input) {
+    tokenizer_init(input);
     lookahead_w_space_parsing();
     return file();
 }

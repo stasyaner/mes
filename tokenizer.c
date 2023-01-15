@@ -6,6 +6,8 @@
 
 #define BUF_SIZE 255
 
+static char *input = NULL;
+static long cursor = 0;
 static int c_cached = '\0';
 static long last_char_index = 0;
 
@@ -18,6 +20,27 @@ static const Spec spec[] = {
     { is_number, handle_number }
 }; */
 
+static char getchar_from_input() {
+    char c = input[cursor];
+
+    if(c == '\0') {
+        return EOF;
+    }
+
+    cursor++;
+
+    return c;
+}
+
+void tokenizer_init(char *init_input) {
+    if(!init_input) {
+        fprintf(stderr, "Trying to init tokenier with NULL input.");
+        exit(1);
+    }
+
+    input = init_input;
+}
+
 Token *get_next_token_base(char parse_space) {
     Token *token;
     char c;
@@ -27,7 +50,7 @@ Token *get_next_token_base(char parse_space) {
         c = c_cached;
         c_cached = '\0';
     } else {
-        c = getchar();
+        c = getchar_from_input();
     }
 
     token = malloc(sizeof(Token));
@@ -46,7 +69,7 @@ Token *get_next_token_base(char parse_space) {
                 );
                 exit(1);
             }
-            c = getchar();
+            c = getchar_from_input();
             if(is_number(c)) {
                 token->value[i] = c;
             } else {
@@ -69,7 +92,7 @@ Token *get_next_token_base(char parse_space) {
                 );
                 exit(1);
             }
-            c = getchar();
+            c = getchar_from_input();
             if(is_string_enclosure(c)) {
                 break;
             } else {
@@ -153,7 +176,7 @@ Token *get_next_token_base(char parse_space) {
                 );
                 exit(1);
             }
-            c = getchar();
+            c = getchar_from_input();
             if(is_alpha(c) || is_underscore(c) || is_number(c)) {
                 token->value[i] = c;
             } else {
@@ -170,7 +193,7 @@ Token *get_next_token_base(char parse_space) {
             token->value[0] = c;
             token->value[1] = '\0';
             for(i = 1;; i++) {
-                c = getchar();
+                c = getchar_from_input();
                 if(is_space(c)) {
                     continue;
                 } else {
