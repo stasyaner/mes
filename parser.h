@@ -10,6 +10,7 @@ enum node_type {
     jsx_opening_element_node,
     jsx_attribute_node,
     jsx_expression_node,
+    jsx_expression_text_node,
     jsx_text_node,
     jsx_closing_element_node
 };

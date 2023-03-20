@@ -28,6 +28,7 @@ static Node *jsx_element_nested();
 static Node *jsx_opening_element(char is_nested, long start_position);
 static Node *jsx_attribute();
 static Node *jsx_expression();
+static Node *jsx_expression_text();
 static Node *jsx_text();
 static Node *jsx_closing_element();
 
@@ -294,7 +295,7 @@ static Node *jsx_expression() {
         } else if(lookahead_token->type == closing_curly_token) {
             break;
         } else {
-            child_func.other_one_argument_function = jsx_text;
+            child_func.other_one_argument_function = jsx_expression_text;
         }
 
         if(!children) {
@@ -317,6 +318,14 @@ static Node *jsx_expression() {
     result->children = children;
     result->start = start_token->start;
     result->end = end_token->end;
+
+    return result;
+}
+
+
+static Node *jsx_expression_text() {
+    Node *result = jsx_text();
+    result->type = jsx_expression_text_node;
 
     return result;
 }
@@ -368,7 +377,7 @@ static Node *jsx_text() {
             exit(1);
         }
 
-        strncpy(p, lookahead_token->value, l);
+        memcpy(p, lookahead_token->value, l);
         p += l;
         if(lookahead_token->type == string_token) {
             *p = '\'';

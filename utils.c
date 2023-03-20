@@ -230,6 +230,7 @@ static void print_node(
                 printf("%s}\n", tabs);
             }
             break;
+        case jsx_expression_text_node:
         case jsx_text_node:
             printf("%s{\n", tabs);
             printf("\t%s\"type\": \"JSXText\",\n", tabs);
