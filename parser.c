@@ -11,6 +11,14 @@
         read_token_and_lookahead_va(1, tt)
 #define read_token_and_lookahead2(tt1, tt2)\
         read_token_and_lookahead_va(2, tt1, tt2)
+#define lookahead()\
+        lookahead_base(0, 0)
+#define lookahead_with_space()\
+        lookahead_base(1, 0)
+#define lookahead_with_linebreak()\
+        lookahead_base(0, 1)
+#define lookahead_with_space_linebreak()\
+        lookahead_base(1, 1)
 
 union jsx_child_function {
     Node *(*jsx_element_nested)(long start_position);
@@ -30,19 +38,25 @@ static Node *jsx_attribute();
 static Node *jsx_expression();
 static Node *jsx_expression_text();
 static Node *jsx_text();
+static Node *jsx_text_with_linebreak();
 static Node *jsx_closing_element();
 
 static Token *lookahead_token = NULL;
-static void lookahead() {
-    lookahead_token = get_next_token();
-}
-static void lookahead_w_space_parsing() {
-    lookahead_token = get_next_token_w_space();
+static void lookahead_base(char with_space, char with_linebreak) {
+    if(with_space && with_linebreak) {
+        lookahead_token = get_next_token_w_space_linebreak();
+    } else if(with_space) {
+        lookahead_token = get_next_token_w_space();
+    } else if(with_linebreak) {
+        lookahead_token = get_next_token_w_linebreak();
+    } else {
+        lookahead_token = get_next_token();
+    }
 }
 
 Node *parse(char *input) {
     tokenizer_init(input);
-    lookahead_w_space_parsing();
+    lookahead_with_space();
     return file();
 }
 
@@ -324,13 +338,13 @@ static Node *jsx_expression() {
 
 
 static Node *jsx_expression_text() {
-    Node *result = jsx_text();
+    Node *result = jsx_text_with_linebreak();
     result->type = jsx_expression_text_node;
 
     return result;
 }
 
-static Node *jsx_text() {
+static Node *jsx_text_base(char with_linebreak) {
     Node *result;
     char *p;
     int skip_closing_curly_count = 0;
@@ -387,12 +401,24 @@ static Node *jsx_text() {
         result->end = lookahead_token->end;
         free(lookahead_token->value);
         free(lookahead_token);
-        lookahead_w_space_parsing();
+        if(with_linebreak) {
+            lookahead_with_space_linebreak();
+        } else {
+            lookahead_with_space();
+        }
     }
 
     *p = '\0';
 
     return result;
+}
+
+static Node *jsx_text() {
+    return jsx_text_base(0);
+}
+
+static Node *jsx_text_with_linebreak() {
+    return jsx_text_base(1);
 }
 
 static Node *jsx_closing_element() {

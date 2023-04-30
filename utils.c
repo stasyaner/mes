@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "parser.h"
 #include "utils.h"
 
 #define BUF_SIZE 255

@@ -1,3 +1,6 @@
+#ifndef __MES_TOKENIZER_H
+#define __MES_TOKENIZER_H
+
 enum token_type {
     string_token,
     number_token,
@@ -25,6 +28,10 @@ typedef struct {
 
 char check_token_type(Token *token, enum token_type acceptable_token_type);
 void tokenizer_init(char *init_input);
-Token *get_next_token_base(char parse_space);
-#define get_next_token_w_space() get_next_token_base(1)
-#define get_next_token() get_next_token_base(0)
+Token *get_next_token_base(char parse_space, char parse_linebreak);
+#define get_next_token_w_space_linebreak() get_next_token_base(1, 1)
+#define get_next_token_w_linebreak() get_next_token_base(0, 1)
+#define get_next_token_w_space() get_next_token_base(1, 0)
+#define get_next_token() get_next_token_base(0, 0)
+
+#endif

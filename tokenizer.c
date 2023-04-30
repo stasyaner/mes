@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "parser.h"
 #include "tokenizer.h"
 #include "utils.h"
 
@@ -41,7 +40,7 @@ void tokenizer_init(char *init_input) {
     input = init_input;
 }
 
-Token *get_next_token_base(char parse_space) {
+Token *get_next_token_base(char parse_space, char parse_linebreak) {
     Token *token;
     char c;
     int i;
@@ -207,13 +206,21 @@ Token *get_next_token_base(char parse_space) {
             free(token->value);
             free(token);
             last_char_index++;
-            return get_next_token_base(parse_space);
+            return get_next_token_base(parse_space, parse_linebreak);
         }
     } else if(is_linebreak(c)) {
-        free(token->value);
-        free(token);
-        last_char_index++;
-        return get_next_token_base(parse_space);
+        if(parse_linebreak) {
+            token->type = linebreak_token;
+            token->value[0] = c;
+            token->value[1] = '\0';
+            token->end = token->start + 1;
+            last_char_index = token->end;
+        } else {
+            free(token->value);
+            free(token);
+            last_char_index++;
+            return get_next_token_base(parse_space, parse_linebreak);
+        }
     } else if(is_eof(c)) {
         free(token->value);
         free(token);
