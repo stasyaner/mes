@@ -1,3 +1,8 @@
+#ifndef __MES_UTILS_H
+#define __MES_UTILS_H
+
+#include "parser.h"
+
 void print_ast(const Node *ast);
 char is_number(int c);
 char is_double_quote(int c);
@@ -16,3 +21,5 @@ char is_closing_curly(int c);
 char is_pipe(int c);
 char is_ampersand(int c);
 char is_equality(int c);
+
+#endif

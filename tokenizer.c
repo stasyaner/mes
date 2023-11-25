@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "parser.h"
 #include "tokenizer.h"
 #include "utils.h"
 
@@ -31,6 +30,7 @@ Token *get_next_token() {
 
     token = malloc(sizeof(Token));
     token->value = malloc(BUF_SIZE);
+
     if(is_number(c)) {
         token->type = number_token;
         token->value[0] = c;
@@ -128,7 +128,7 @@ Token *get_next_token() {
                 exit(1);
             }
             c = getchar();
-            if(is_alpha(c) || is_underscore(c)) {
+            if(is_alpha(c) || is_underscore(c) || is_number(c)) {
                 token->value[i] = c;
             } else {
                 c_cached = c;

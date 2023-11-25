@@ -1,3 +1,6 @@
+#ifndef __MES_TOKENIZER_H
+#define __MES_TOKENIZER_H
+
 enum token_type {
     string_token,
     number_token,
@@ -20,3 +23,5 @@ typedef struct {
 
 char check_token_type(Token *token, enum token_type acceptable_token_type);
 Token *get_next_token();
+
+#endif

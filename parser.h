@@ -1,3 +1,6 @@
+#ifndef __MES_PARSER_H
+#define __MES_PARSER_H
+
 enum node_type {
     file_node,
     numeric_literal_node,
@@ -28,3 +31,5 @@ typedef struct ASTNode {
 } Node;
 
 Node *parse();
+
+#endif
